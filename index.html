@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>صندوق العائلة</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style id="app-style">
+:root{
+  --bg:#FBF8F3; --surface:#FFFFFF; --surface-2:#F2EBDA; --border:#E3D9C2;
+  --text:#1B211F; --text-muted:#626B62;
+  --primary:#147A67; --primary-dark:#0B4A40; --primary-soft:#E4F1EC;
+  --accent:#C08A28; --accent-soft:#F7ECD6;
+  --success:#1E8A5F; --success-soft:#E3F3EA;
+  --warning:#C08A28; --warning-soft:#FBF0DC;
+  --critical:#B23B3B; --critical-soft:#FBE7E5;
+  --shadow:0 1px 2px rgba(27,33,31,.06), 0 8px 24px -12px rgba(27,33,31,.16);
+  --radius-sm:8px; --radius-md:14px; --radius-lg:20px;
+  --font-display:'El Messiri','Tahoma',sans-serif;
+  --font-body:'IBM Plex Sans Arabic','Tahoma',Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1B17; --surface:#142722; --surface-2:#1B332B; --border:#2A473D;
+    --text:#EDF2EE; --text-muted:#A9BBB2;
+    --primary:#3FB893; --primary-dark:#6FD1AE; --primary-soft:rgba(63,184,147,.16);
+    --accent:#E0AC4D; --accent-soft:rgba(224,172,77,.16);
+    --success:#4CAF7D; --success-soft:rgba(76,175,125,.16);
+    --warning:#E0AC4D; --warning-soft:rgba(224,172,77,.16);
+    --critical:#E2695F; --critical-soft:rgba(226,105,95,.16);
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1B17; --surface:#142722; --surface-2:#1B332B; --border:#2A473D;
+  --text:#EDF2EE; --text-muted:#A9BBB2;
+  --primary:#3FB893; --primary-dark:#6FD1AE; --primary-soft:rgba(63,184,147,.16);
+  --accent:#E0AC4D; --accent-soft:rgba(224,172,77,.16);
+  --success:#4CAF7D; --success-soft:rgba(76,175,125,.16);
+  --warning:#E0AC4D; --warning-soft:rgba(224,172,77,.16);
+  --critical:#E2695F; --critical-soft:rgba(226,105,95,.16);
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;direction:rtl;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6;}
+#app{max-width:1080px;margin:0 auto;padding:0 16px 64px;}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;}
+button{font-family:inherit;}
+.topbar{position:sticky;top:0;z-index:20;background:var(--bg);padding-top:20px;padding-bottom:8px;}
+.topbar-inner{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.brand{display:flex;flex-direction:column;gap:4px;}
+.brand h1{font-size:26px;font-weight:700;color:var(--primary-dark);}
+.brand .meta-line{font-size:12.5px;color:var(--text-muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:600;}
+.pill-demo{background:var(--accent-soft);color:var(--accent);}
+.pill-readonly{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border);}
+.balance-chip{background:var(--primary);color:#fff;border-radius:var(--radius-md);padding:10px 20px;text-align:center;box-shadow:var(--shadow);min-width:180px;}
+.balance-chip .label{font-size:12px;opacity:.85;}
+.balance-chip .value{font-family:var(--font-display);font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;}
+.tabs{display:flex;gap:4px;margin-top:18px;border-bottom:1px solid var(--border);overflow-x:auto;padding-bottom:0;}
+.tab-btn{white-space:nowrap;background:none;border:none;padding:10px 16px;font-size:14.5px;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;}
+.tab-btn.active{color:var(--primary-dark);border-bottom-color:var(--primary);}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tab-btn.active{color:var(--primary);}}
+:root[data-theme="dark"] .tab-btn.active{color:var(--primary);}
+.panel{padding-top:22px;display:flex;flex-direction:column;gap:22px;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media (max-width:760px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;box-shadow:var(--shadow);}
+.stat-card .stat-label{font-size:12.5px;color:var(--text-muted);margin-bottom:6px;}
+.stat-card .stat-value{font-family:var(--font-display);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;}
+.stat-card.accent .stat-value{color:var(--accent);}
+.stat-card.crit .stat-value{color:var(--critical);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);}
+.card h2{font-size:17px;color:var(--primary-dark);margin-bottom:14px;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13.5px;}
+.bar-row .bar-label{width:170px;flex-shrink:0;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{flex:1;background:var(--surface-2);border-radius:6px;height:10px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--primary);border-radius:6px;}
+.bar-value{width:110px;flex-shrink:0;text-align:left;font-variant-numeric:tabular-nums;font-weight:600;}
+.activity-item{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;}
+.activity-item:last-child{border-bottom:none;}
+.activity-item .a-title{color:var(--text);}
+.activity-item .a-sub{color:var(--text-muted);font-size:12px;}
+.activity-item .a-amt{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;}
+.row-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.select,.input,textarea{font-family:inherit;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-size:14px;}
+.input:focus,.select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--primary);outline-offset:1px;}
+.search-input{min-width:200px;flex:1;}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-md);}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px;}
+th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
+th{background:var(--surface-2);color:var(--text-muted);font-weight:600;font-size:12.5px;position:sticky;top:0;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--surface-2);}
+.status-btn{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;line-height:1.3;}
+.status-btn.paid{background:var(--success-soft);color:var(--success);border-color:transparent;}
+.status-btn.unpaid{background:var(--critical-soft);color:var(--critical);border-color:transparent;}
+.status-btn small{font-weight:400;font-size:10.5px;opacity:.85;}
+.status-btn:disabled{cursor:default;opacity:.9;}
+.name-cell{font-weight:600;}
+.pager{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px;font-size:13px;color:var(--text-muted);}
+.btn{border:none;border-radius:var(--radius-sm);padding:9px 16px;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-dark);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-ghost{background:var(--surface-2);color:var(--text);}
+.btn-danger{background:var(--critical-soft);color:var(--critical);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:640px){.form-grid{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12.5px;color:var(--text-muted);font-weight:600;}
+.field.span2{grid-column:1/-1;}
+.admin-section{display:flex;flex-direction:column;gap:10px;}
+.admin-section h3{font-size:14.5px;color:var(--primary-dark);}
+.hint{font-size:12px;color:var(--text-muted);}
+.category-chip{display:inline-flex;align-items:center;gap:8px;background:var(--surface-2);border-radius:999px;padding:5px 6px 5px 12px;font-size:13px;margin:3px;}
+.category-chip button{background:none;border:none;color:var(--critical);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;}
+.readonly-note{background:var(--surface-2);border:1px dashed var(--border);border-radius:var(--radius-md);padding:18px;color:var(--text-muted);font-size:13.5px;text-align:center;}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,25,20,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:100;}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:22px;width:100%;max-width:420px;box-shadow:var(--shadow);max-height:90vh;overflow:auto;}
+.modal h2{font-size:16.5px;margin-bottom:14px;}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--primary-dark);color:#fff;padding:11px 20px;border-radius:999px;font-size:13.5px;box-shadow:var(--shadow);z-index:200;}
+.demo-tag{font-size:10.5px;color:var(--accent);font-weight:600;margin-right:6px;}
+.date-hijri{font-weight:600;}
+.date-greg{font-size:11px;color:var(--text-muted);}
+.year-nav{display:flex;align-items:center;gap:8px;}
+::selection{background:var(--primary-soft);}
+</style>
+</head>
+<body>
+<div id="app"><div class="topbar"><div class="topbar-inner"><div class="brand"><h1>صندوق العائلة</h1><div class="meta-line"><span>آخر تحديث: 06 سبتمبر 2026</span></div></div><div class="balance-chip"><div class="label">رصيد الصندوق الحالي</div><div class="value">21,000 ر.س</div></div></div></div><div class="tabs" role="tablist"><button class="tab-btn active" data-action="switch-tab" data-tab="overview">نظرة عامة</button><button class="tab-btn" data-action="switch-tab" data-tab="members">الأعضاء والدفعات</button><button class="tab-btn" data-action="switch-tab" data-tab="grave">القبر</button><button class="tab-btn" data-action="switch-tab" data-tab="expenses">المصروفات</button><button class="tab-btn" data-action="switch-tab" data-tab="admin">الإدارة</button></div><div class="panel"><div class="stat-grid"><div class="stat-card "><div class="stat-label">رصيد الصندوق</div><div class="stat-value">21,000 ر.س</div></div><div class="stat-card "><div class="stat-label">تحصيل عام 1448هـ</div><div class="stat-value">21,000 ر.س</div></div><div class="stat-card crit"><div class="stat-label">مصروفات عام 1448هـ</div><div class="stat-value">0 ر.س</div></div><div class="stat-card accent"><div class="stat-label">سداد كامل</div><div class="stat-value">0 من 140</div></div></div><div class="card"><h2>توزيع المصروفات حسب البند (كل الأعوام)</h2><div class="bar-row"><div class="bar-label">دعم الأعضاء (زواج، مرض، وفاة)</div><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><div class="bar-value">0 ر.س</div></div><div class="bar-row"><div class="bar-label">مناسبات واجتماعات عائلية</div><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><div class="bar-value">0 ر.س</div></div><div class="bar-row"><div class="bar-label">مصاريف إدارية وتشغيلية</div><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><div class="bar-value">0 ر.س</div></div><div class="bar-row"><div class="bar-label">أخرى</div><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><div class="bar-value">0 ر.س</div></div></div><div class="card"><h2>آخر الحركات</h2><div class="activity-item"><div><div class="a-title">صالح بن محمد بن دواس ال سالم — دفعة أساسية</div><div class="a-sub">دفعة محرم / 1448هـ · 1 محرم</div></div><div class="a-amt" style="color:var(--success)">+150 ر.س</div></div><div class="activity-item"><div><div class="a-title">دواس بن صالح بن محمد دواس — دفعة أساسية</div><div class="a-sub">دفعة محرم / 1448هـ · 1 محرم</div></div><div class="a-amt" style="color:var(--success)">+150 ر.س</div></div><div class="activity-item"><div><div class="a-title">مانع بن صالح بن محمد دواس — دفعة أساسية</div><div class="a-sub">دفعة محرم / 1448هـ · 1 محرم</div></div><div class="a-amt" style="color:var(--success)">+150 ر.س</div></div><div class="activity-item"><div><div class="a-title">محمد بن صالح بن محمد دواس — دفعة أساسية</div><div class="a-sub">دفعة محرم / 1448هـ · 1 محرم</div></div><div class="a-amt" style="color:var(--success)">+150 ر.س</div></div><div class="activity-item"><div><div class="a-title">محسن بن صالح بن محمد دواس — دفعة أساسية</div><div class="a-sub">دفعة محرم / 1448هـ · 1 محرم</div></div><div class="a-amt" style="color:var(--success)">+150 ر.س</div></div><div class="activity-item"><div><div class="a-title">علي بن صالح بن محمد دواس — دفعة أساسية</div><div class="a-sub">دفعة محرم / 1448هـ · 1 محرم</div></div><div class="a-amt" style="color:var(--success)">+150 ر.س</div></div><div class="activity-item"><div><div class="a-title">یحیى بن صالح بن محمد دواس — دفعة أساسية</div><div class="a-sub">دفعة محرم / 1448هـ · 1 محرم</div></div><div class="a-amt" style="color:var(--success)">+150 ر.س</div></div><div class="activity-item"><div><div class="a-title">حسین بن صالح بن محمد دواس — دفعة أساسية</div><div class="a-sub">دفعة محرم / 1448هـ · 1 محرم</div></div><div class="a-amt" style="color:var(--success)">+150 ر.س</div></div></div></div></div>
+<script id="app-logic">
+"use strict";
+
+/* ---------- helpers ---------- */
+function uid(prefix){ return (prefix||"id") + "_" + Math.random().toString(36).slice(2,9); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function fmtMoney(n, cur){
+  var v = Math.round((n||0) * 100) / 100;
+  return v.toLocaleString("en-US", {minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits:2}) + " " + (cur || STATE.settings.currency);
+}
+var AR_MONTHS = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+function fmtDate(iso){
+  if(!iso) return "—";
+  var p = iso.split("-");
+  if(p.length < 3) return iso;
+  return p[2] + " " + AR_MONTHS[parseInt(p[1],10)-1] + " " + p[0];
+}
+function fmtDateTime(iso){
+  if(!iso) return "—";
+  var d = new Date(iso);
+  if(isNaN(d.getTime())) return iso;
+  return fmtDate(d.toISOString().slice(0,10));
+}
+/* ---------- hijri calendar (المرجع: أم القرى، عبر Intl المدمجة بالمتصفح) ---------- */
+var HIJRI_MONTHS = ["محرم","صفر","ربيع الأول","ربيع الآخر","جمادى الأولى","جمادى الآخرة","رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة"];
+function hijriParts(iso){
+  if(!iso) return {year:null, month:null, day:null};
+  try{
+    var d = new Date(iso + "T12:00:00");
+    var parts = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {year:"numeric", month:"numeric", day:"numeric"}).formatToParts(d);
+    var o = {};
+    parts.forEach(function(p){ o[p.type] = p.value; });
+    return {year: parseInt(o.year,10), month: parseInt(o.month,10), day: parseInt(o.day,10)};
+  }catch(err){ return {year:null, month:null, day:null}; }
+}
+function hijriShort(iso){
+  var h = hijriParts(iso);
+  if(!h.year) return "—";
+  return h.day + " " + HIJRI_MONTHS[h.month-1];
+}
+function hijriLabel(iso){
+  var h = hijriParts(iso);
+  if(!h.year) return "—";
+  return h.day + " " + HIJRI_MONTHS[h.month-1] + " " + h.year + "هـ";
+}
+function fmtDateDual(iso){
+  if(!iso) return "—";
+  return '<span class="date-hijri">' + hijriLabel(iso) + '</span><br><span class="date-greg">' + fmtDate(iso) + ' م</span>';
+}
+function installmentLabel(inst){ return inst===1 ? HIJRI_MONTHS[0] : HIJRI_MONTHS[6]; }
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function memberAmount(state, memberId){
+  var m = state.members.find(function(x){ return x.id === memberId; });
+  return (m && m.customAmount != null) ? m.customAmount : state.settings.installmentAmount;
+}
+function yearsInUse(state){
+  var set = {};
+  set[state.settings.currentYear] = true;
+  state.payments.forEach(function(p){ set[p.year] = true; });
+  state.expenses.forEach(function(e){ var h = hijriParts(e.date); if(h.year) set[h.year] = true; });
+  return Object.keys(set).map(Number).filter(function(y){return y;}).sort(function(a,b){return b-a;});
+}
+function currentViewYear(state, ui){ return (ui && ui.year != null) ? ui.year : state.settings.currentYear; }
+
+/* ---------- computed views ---------- */
+function memberYearInfo(state, memberId, year){
+  var pays = state.payments.filter(function(p){ return p.memberId === memberId && p.year === year; });
+  var inst1 = pays.find(function(p){ return p.installment === 1 && p.type === "دفعة أساسية"; });
+  var inst2 = pays.find(function(p){ return p.installment === 2 && p.type === "دفعة أساسية"; });
+  var extra = pays.filter(function(p){ return p.type === "دعم إضافي"; }).reduce(function(s,p){ return s+p.amount; }, 0);
+  var total = (inst1?inst1.amount:0) + (inst2?inst2.amount:0) + extra;
+  return { inst1: inst1, inst2: inst2, extra: extra, total: total };
+}
+function overview(state, year){
+  var totalCollectedAll = state.payments.reduce(function(s,p){ return s+p.amount; }, 0);
+  var totalSpentAll = state.expenses.reduce(function(s,e){ return s+e.amount; }, 0);
+  year = year || state.settings.currentYear;
+  var totalCollectedYear = state.payments.filter(function(p){return p.year===year;}).reduce(function(s,p){ return s+p.amount; }, 0);
+  var totalSpentYear = state.expenses.filter(function(e){return hijriParts(e.date).year===year;}).reduce(function(s,e){ return s+e.amount; }, 0);
+  var fullyPaid = state.members.filter(function(m){
+    var info = memberYearInfo(state, m.id, year);
+    var due = memberAmount(state, m.id);
+    return info.inst1 && info.inst2 && info.inst1.amount >= due && info.inst2.amount >= due;
+  }).length;
+  var catTotals = {};
+  state.settings.categories.forEach(function(c){ catTotals[c]=0; });
+  state.expenses.forEach(function(e){ catTotals[e.category] = (catTotals[e.category]||0) + e.amount; });
+  return {
+    balance: totalCollectedAll - totalSpentAll,
+    totalCollectedAll: totalCollectedAll, totalSpentAll: totalSpentAll,
+    totalCollectedYear: totalCollectedYear, totalSpentYear: totalSpentYear,
+    fullyPaid: fullyPaid, memberCount: state.members.length,
+    catTotals: catTotals
+  };
+}
+
+/* ---------- render: shell ---------- */
+function renderApp(state, ui){
+  return renderTopbar(state, ui) +
+    '<div class="tabs" role="tablist">' + renderTabs(ui) + '</div>' +
+    '<div class="panel">' + renderTabContent(state, ui) + '</div>' +
+    (ui.modal ? renderModal(state, ui) : "") +
+    (ui.toast ? '<div class="toast">' + esc(ui.toast) + '</div>' : "");
+}
+
+function renderTopbar(state, ui){
+  var ov = overview(state);
+  var badge = ui.canWrite === false
+    ? '<span class="pill pill-readonly">👁 عرض فقط</span>'
+    : "";
+  return '<div class="topbar"><div class="topbar-inner">' +
+    '<div class="brand"><h1>' + esc(state.meta.fundName) + '</h1>' +
+    '<div class="meta-line"><span>آخر تحديث: ' + fmtDateTime(state.meta.updatedAt) + '</span>' + badge + '</div></div>' +
+    '<div class="balance-chip"><div class="label">رصيد الصندوق الحالي</div><div class="value">' + fmtMoney(ov.balance, state.settings.currency) + '</div></div>' +
+    '</div></div>';
+}
+
+var TABS = [
+  {id:"overview", label:"نظرة عامة"},
+  {id:"members", label:"الأعضاء والدفعات"},
+  {id:"grave", label:"القبر"},
+  {id:"expenses", label:"المصروفات"},
+  {id:"admin", label:"الإدارة"}
+];
+function renderTabs(ui){
+  return TABS.map(function(t){
+    return '<button class="tab-btn' + (ui.activeTab===t.id?" active":"") + '" data-action="switch-tab" data-tab="' + t.id + '">' + t.label + '</button>';
+  }).join("");
+}
+function renderTabContent(state, ui){
+  if(ui.activeTab === "members") return renderMembersTab(state, ui);
+  if(ui.activeTab === "grave") return renderGraveTab(state, ui);
+  if(ui.activeTab === "expenses") return renderExpensesTab(state, ui);
+  if(ui.activeTab === "admin") return renderAdminTab(state, ui);
+  return renderOverviewTab(state, ui);
+}
+
+/* ---------- overview tab ---------- */
+function renderOverviewTab(state, ui){
+  var year = currentViewYear(state, ui);
+  var ov = overview(state, year);
+  var cats = state.settings.categories.slice();
+  var maxCat = Math.max.apply(null, cats.map(function(c){return ov.catTotals[c]||0;}).concat([1]));
+  var barsHtml = cats.map(function(c){
+    var v = ov.catTotals[c]||0;
+    var pct = Math.round((v/maxCat)*100);
+    return '<div class="bar-row"><div class="bar-label">' + esc(c) + '</div>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="bar-value">' + fmtMoney(v, state.settings.currency) + '</div></div>';
+  }).join("");
+
+  var activity = state.payments.map(function(p){
+    var m = state.members.find(function(x){return x.id===p.memberId;});
+    return {date:p.date, title:(m?m.name:"عضو محذوف") + " — " + p.type, sub:(p.type==="دفعة أساسية"?("دفعة "+installmentLabel(p.installment)+" / "+p.year+"هـ"):(p.year+"هـ")), amt:p.amount, kind:"in"};
+  }).concat(state.expenses.map(function(e){
+    return {date:e.date, title:e.category, sub:e.description||"", amt:-e.amount, kind:"out"};
+  })).sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).slice(0,8);
+
+  var activityHtml = activity.length ? activity.map(function(a){
+    return '<div class="activity-item"><div><div class="a-title">' + esc(a.title) + '</div><div class="a-sub">' + esc(a.sub) + ' · ' + hijriShort(a.date) + '</div></div>' +
+      '<div class="a-amt" style="color:' + (a.kind==="in"?"var(--success)":"var(--critical)") + '">' + (a.kind==="in"?"+":"−") + fmtMoney(Math.abs(a.amt), state.settings.currency) + '</div></div>';
+  }).join("") : '<div class="hint">لا توجد حركات مسجلة بعد.</div>';
+
+  return '<div class="stat-grid">' +
+    statCard("رصيد الصندوق", fmtMoney(ov.balance, state.settings.currency), "") +
+    statCard("تحصيل عام " + year + "هـ", fmtMoney(ov.totalCollectedYear, state.settings.currency), "") +
+    statCard("مصروفات عام " + year + "هـ", fmtMoney(ov.totalSpentYear, state.settings.currency), "crit") +
+    statCard("سداد كامل", ov.fullyPaid + " من " + ov.memberCount, "accent") +
+    '</div>' +
+    '<div class="card"><h2>توزيع المصروفات حسب البند (كل الأعوام)</h2>' + barsHtml + '</div>' +
+    '<div class="card"><h2>آخر الحركات</h2>' + activityHtml + '</div>';
+}
+function statCard(label, value, cls){
+  return '<div class="stat-card ' + (cls||"") + '"><div class="stat-label">' + esc(label) + '</div><div class="stat-value">' + esc(value) + '</div></div>';
+}
+
+/* ---------- members tab ---------- */
+var PAGE_SIZE = 25;
+function renderMembersTab(state, ui){
+  var year = currentViewYear(state, ui);
+  var years = yearsInUse(state);
+  var q = (ui.search||"").trim().toLowerCase();
+  var list = state.members.filter(function(m){ return !q || m.name.toLowerCase().indexOf(q) > -1; });
+  list = list.slice().sort(function(a,b){ return (a.seq||0) - (b.seq||0); });
+  var totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  var page = Math.min(ui.page||1, totalPages);
+  var pageList = list.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
+  var yearOpts = years.map(function(y){ return '<option value="' + y + '"' + (y===year?" selected":"") + '>' + y + ' هـ</option>'; }).join("");
+
+  var rows = pageList.map(function(m){
+    var info = memberYearInfo(state, m.id, year);
+    var due = memberAmount(state, m.id);
+    return '<tr>' +
+      '<td class="hint">' + (m.seq!=null ? m.seq : "—") + '</td>' +
+      '<td class="name-cell">' + esc(m.name) + (m.isDemo?'<span class="demo-tag">تجريبي</span>':"") + '</td>' +
+      '<td>' + statusBtn(m.id, 1, info.inst1, due, ui) + '</td>' +
+      '<td>' + statusBtn(m.id, 2, info.inst2, due, ui) + '</td>' +
+      '<td style="font-variant-numeric:tabular-nums">' + (info.extra ? fmtMoney(info.extra, state.settings.currency) : "—") + '</td>' +
+      '<td style="font-weight:700;font-variant-numeric:tabular-nums">' + fmtMoney(info.total, state.settings.currency) + '</td>' +
+      '</tr>';
+  }).join("");
+
+  return '<div class="card">' +
+    '<div class="hint" style="margin-bottom:10px">الدفعتان الأساسيتان تُحصَّلان في محرم ورجب من كل عام هجري. ترتيب الأعضاء كما في قائمتكم الأصلية.</div>' +
+    '<div class="row-tools">' +
+      '<div class="year-nav"><label class="hint">السنة</label><select class="select" data-action="change-year">' + yearOpts + '</select></div>' +
+      '<input class="input search-input" placeholder="بحث عن عضو…" data-action="search" value="' + esc(ui.search||"") + '">' +
+    '</div>' +
+    '<div class="table-wrap"><table><thead><tr><th>#</th><th>العضو</th><th>دفعة ' + HIJRI_MONTHS[0] + '</th><th>دفعة ' + HIJRI_MONTHS[6] + '</th><th>دعم إضافي</th><th>الإجمالي</th></tr></thead>' +
+    '<tbody>' + (rows || '<tr><td colspan="6" class="hint">لا يوجد أعضاء مطابقون.</td></tr>') + '</tbody></table></div>' +
+    '<div class="pager">' +
+      '<button class="btn btn-ghost btn-sm" data-action="page-prev" ' + (page<=1?"disabled":"") + '>السابق</button>' +
+      '<span>صفحة ' + page + ' من ' + totalPages + ' — ' + list.length + ' عضو</span>' +
+      '<button class="btn btn-ghost btn-sm" data-action="page-next" ' + (page>=totalPages?"disabled":"") + '>التالي</button>' +
+    '</div></div>';
+}
+function statusBtn(memberId, inst, payment, due, ui){
+  var canWrite = ui.canWrite !== false;
+  if(payment){
+    return '<button class="status-btn paid" data-action="open-payment" data-member="' + memberId + '" data-inst="' + inst + '" ' + (canWrite?"":"disabled") + '>مسدد<small>' + fmtMoney(payment.amount) + ' · ' + hijriShort(payment.date) + '</small></button>';
+  }
+  return '<button class="status-btn unpaid" data-action="open-payment" data-member="' + memberId + '" data-inst="' + inst + '" ' + (canWrite?"":"disabled") + '>لم يسدد<small>المستحق ' + fmtMoney(due) + '</small></button>';
+}
+
+/* ---------- grave (القبر) tab ---------- */
+function graveContribution(state, memberId, caseId){
+  return (state.graveContributions||[]).find(function(g){ return g.memberId===memberId && g.caseId===caseId; });
+}
+function graveCellBtn(memberId, caseId, contribution, ui){
+  var canWrite = ui.canWrite !== false;
+  if(contribution){
+    return '<button class="status-btn paid" data-action="open-grave-cell" data-member="' + memberId + '" data-case="' + caseId + '" ' + (canWrite?"":"disabled") + '>' + contribution.amount + '</button>';
+  }
+  return '<button class="status-btn unpaid" data-action="open-grave-cell" data-member="' + memberId + '" data-case="' + caseId + '" ' + (canWrite?"":"disabled") + '>—</button>';
+}
+function renderGraveTab(state, ui){
+  var canWrite = ui.canWrite !== false;
+  var cases = (state.graveCases||[]).slice().sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
+  var members = state.members.slice().sort(function(a,b){ return (a.seq||0)-(b.seq||0); });
+
+  var addForm = canWrite ? (
+    '<div class="card admin-section"><h3>إضافة حالة وفاة جديدة</h3>' +
+    '<form data-action="add-grave-case" class="form-grid">' +
+      '<div class="field"><label>اسم المتوفى</label><input class="input" name="deceasedName" placeholder="مثال: فلان بن فلان (لا يشترط أن يكون من الأعضاء)" required></div>' +
+      '<div class="field"><label>التاريخ (ميلادي)</label><input class="input" type="date" name="date" data-action="preview-hijri" value="' + todayISO() + '" required>' +
+      '<span class="hint" id="hijri-preview">الموافق: ' + hijriLabel(todayISO()) + '</span></div>' +
+      '<div class="field span2"><label>ملاحظة (اختياري)</label><input class="input" name="note" placeholder="مثال: والد العضو فلان"></div>' +
+      '<div class="field span2"><button class="btn btn-primary" type="submit">+ إضافة حالة</button></div>' +
+    '</form></div>'
+  ) : "";
+
+  if(!cases.length){
+    return addForm + '<div class="card"><div class="hint">لا توجد حالات وفاة مسجلة بعد. مساهمات الأعضاء تكون على 3 خيارات ثابتة: ' + fmtMoney(25,state.settings.currency) + ' / ' + fmtMoney(50,state.settings.currency) + ' / ' + fmtMoney(75,state.settings.currency) + '.</div></div>';
+  }
+
+  var headCells = cases.map(function(c){
+    return '<th>' + esc(c.name) + '<br><span class="hint" style="font-weight:400">' + hijriShort(c.date) + '</span>' +
+      (canWrite ? '<br><button class="btn btn-ghost btn-sm" data-action="remove-grave-case" data-id="' + c.id + '" title="حذف الحالة" style="margin-top:4px">حذف</button>' : "") +
+      '</th>';
+  }).join("");
+
+  var rows = members.map(function(m){
+    var cells = cases.map(function(c){
+      var contrib = graveContribution(state, m.id, c.id);
+      return '<td>' + graveCellBtn(m.id, c.id, contrib, ui) + '</td>';
+    }).join("");
+    return '<tr><td class="hint">' + (m.seq!=null?m.seq:"—") + '</td><td class="name-cell">' + esc(m.name) + '</td>' + cells + '</tr>';
+  }).join("");
+
+  var totalsRow = '<tr><td colspan="2" style="font-weight:700">الإجمالي</td>' + cases.map(function(c){
+    var total = (state.graveContributions||[]).filter(function(g){return g.caseId===c.id;}).reduce(function(s,g){return s+g.amount;},0);
+    return '<td style="font-weight:700;font-variant-numeric:tabular-nums">' + fmtMoney(total, state.settings.currency) + '</td>';
+  }).join("") + '</tr>';
+
+  return addForm +
+    '<div class="card">' +
+    '<div class="hint" style="margin-bottom:10px">مساهمات الأعضاء لدعم أهل المتوفى — المبلغ ثابت على 3 خيارات: ' + fmtMoney(25,state.settings.currency) + ' / ' + fmtMoney(50,state.settings.currency) + ' / ' + fmtMoney(75,state.settings.currency) + '. المتوفى لا يشترط أن يكون من ضمن قائمة الأعضاء.</div>' +
+    '<div class="table-wrap"><table><thead><tr><th>#</th><th>العضو</th>' + headCells + '</tr></thead>' +
+    '<tbody>' + rows + totalsRow + '</tbody></table></div>' +
+    '</div>';
+}
+
+/* ---------- expenses tab ---------- */
+function renderExpensesTab(state, ui){
+  var canWrite = ui.canWrite !== false;
+  var year = currentViewYear(state, ui);
+  var years = yearsInUse(state);
+  var yearOpts = years.map(function(y){ return '<option value="' + y + '"' + (y===year?" selected":"") + '>' + y + ' هـ</option>'; }).join("");
+  var list = state.expenses.filter(function(e){ return hijriParts(e.date).year === year; })
+    .sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
+  var total = list.reduce(function(s,e){return s+e.amount;},0);
+
+  var rows = list.map(function(e){
+    var ben = e.beneficiaryId ? (state.members.find(function(m){return m.id===e.beneficiaryId;})||{}).name : "";
+    return '<tr>' +
+      '<td>' + fmtDateDual(e.date) + '</td>' +
+      '<td>' + esc(e.category) + '</td>' +
+      '<td>' + esc(e.description||"—") + (ben? ' <span class="hint">(' + esc(ben) + ')</span>':"") + '</td>' +
+      '<td style="font-weight:700;font-variant-numeric:tabular-nums;color:var(--critical)">' + fmtMoney(e.amount, state.settings.currency) + '</td>' +
+      '<td>' + (canWrite ? '<button class="btn btn-ghost btn-sm" data-action="delete-expense" data-id="' + e.id + '">حذف</button>' : "") + '</td>' +
+      '</tr>';
+  }).join("");
+
+  return '<div class="card">' +
+    '<div class="row-tools">' +
+      '<div class="year-nav"><label class="hint">السنة</label><select class="select" data-action="change-year">' + yearOpts + '</select>' +
+      '<span class="hint">إجمالي عام ' + year + 'هـ: <strong style="color:var(--critical)">' + fmtMoney(total, state.settings.currency) + '</strong></span></div>' +
+      (canWrite ? '<button class="btn btn-primary" data-action="open-expense">+ إضافة مصروف</button>' : "") +
+    '</div>' +
+    '<div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>البند</th><th>الوصف</th><th>المبلغ</th><th></th></tr></thead>' +
+    '<tbody>' + (rows || '<tr><td colspan="5" class="hint">لا توجد مصروفات مسجلة لهذا العام.</td></tr>') + '</tbody></table></div>' +
+  '</div>';
+}
+
+/* ---------- admin tab ---------- */
+function renderAdminTab(state, ui){
+  if(ui.canWrite === false){
+    return '<div class="readonly-note">هذه الصفحة للعرض فقط بالنسبة لك.<br>لإضافة أعضاء أو تسجيل دفعات ومصروفات، تواصل مع أمين الصندوق الذي يملك صلاحية التعديل على هذه الصفحة.</div>';
+  }
+  var s = state.settings;
+  var catsHtml = s.categories.map(function(c,i){
+    return '<span class="category-chip">' + esc(c) + (s.categories.length>1?' <button data-action="remove-category" data-index="' + i + '" title="حذف">×</button>':"") + '</span>';
+  }).join("");
+
+  var membersRows = state.members.slice().sort(function(a,b){return (a.seq||0)-(b.seq||0);}).map(function(m){
+    return '<tr><td class="hint">' + (m.seq!=null?m.seq:"—") + '</td><td>' + esc(m.name) + (m.isDemo?'<span class="demo-tag">تجريبي</span>':"") + '</td>' +
+      '<td>' + (m.customAmount!=null ? fmtMoney(m.customAmount, s.currency) : '<span class="hint">الافتراضي</span>') + '</td>' +
+      '<td><button class="btn btn-ghost btn-sm" data-action="delete-member" data-id="' + m.id + '">حذف</button></td></tr>';
+  }).join("");
+
+  return '' +
+    '<div class="card admin-section"><h2>إعدادات الصندوق</h2>' +
+    '<form data-action="save-settings" class="form-grid">' +
+      '<div class="field"><label>اسم الصندوق</label><input class="input" name="fundName" value="' + esc(s.fundNameDraft!=null?s.fundNameDraft:state.meta.fundName) + '"></div>' +
+      '<div class="field"><label>عملة العرض</label><input class="input" name="currency" value="' + esc(s.currency) + '"></div>' +
+      '<div class="field"><label>قيمة الدفعة الافتراضية</label><input class="input" type="number" min="0" step="0.01" name="installmentAmount" value="' + s.installmentAmount + '"></div>' +
+      '<div class="field"><label>السنة الهجرية الحالية</label><input class="input" type="number" name="currentYear" value="' + s.currentYear + '"><span class="hint">تُحدَّث مرة كل عام هجري (مثلًا عند دخول محرم الجديد)</span></div>' +
+      '<div class="field span2"><button class="btn btn-primary" type="submit">حفظ الإعدادات</button></div>' +
+    '</form></div>' +
+
+    '<div class="card admin-section"><h3>بنود الصرف</h3><div>' + catsHtml + '</div>' +
+    '<form data-action="add-category" class="row-tools" style="margin-top:6px">' +
+      '<input class="input" name="category" placeholder="اسم بند جديد" style="flex:1">' +
+      '<button class="btn btn-outline" type="submit">إضافة بند</button>' +
+    '</form></div>' +
+
+    '<div class="card admin-section"><h3>إضافة أعضاء</h3>' +
+    '<form data-action="add-member" class="row-tools">' +
+      '<input class="input" name="name" placeholder="اسم العضو" style="flex:1">' +
+      '<button class="btn btn-outline" type="submit">إضافة عضو</button>' +
+    '</form>' +
+    '<div class="hint">لإضافة عدد كبير دفعة واحدة، الصق اسمًا في كل سطر:</div>' +
+    '<form data-action="bulk-add-members">' +
+      '<textarea class="input" name="names" rows="4" style="width:100%" placeholder="عبدالله السالم' + String.fromCharCode(10) + 'منيرة العتيبي' + String.fromCharCode(10) + '..."></textarea>' +
+      '<div style="margin-top:8px"><button class="btn btn-outline" type="submit">إضافة الأسماء</button></div>' +
+    '</form></div>' +
+
+    '<div class="card admin-section"><h3>قائمة الأعضاء (' + state.members.length + ')</h3>' +
+    '<div class="table-wrap"><table><thead><tr><th>#</th><th>الاسم</th><th>قيمة الدفعة</th><th></th></tr></thead><tbody>' +
+    (membersRows || '<tr><td colspan="4" class="hint">لا يوجد أعضاء بعد.</td></tr>') + '</tbody></table></div></div>' +
+
+    '<div class="card admin-section"><h3>منطقة الخطر</h3>' +
+    '<div class="hint">يمسح هذا الإجراء الأعضاء والحركات التجريبية فقط، ولا يمس بيانات عائلتك الفعلية.</div>' +
+    '<div><button class="btn btn-danger" data-action="clear-demo">مسح البيانات التجريبية</button></div></div>';
+}
+
+/* ---------- modals ---------- */
+function renderModal(state, ui){
+  var m = ui.modal;
+  if(m.type === "payment"){
+    var mem = state.members.find(function(x){return x.id===m.memberId;});
+    var existing = m.payment;
+    var initialDate = existing ? existing.date : todayISO();
+    return modalWrap('تسجيل دفعة — ' + esc(mem?mem.name:"") + ' (دفعة ' + installmentLabel(m.inst) + ')',
+      '<form data-action="save-payment">' +
+      '<input type="hidden" name="memberId" value="' + m.memberId + '">' +
+      '<input type="hidden" name="inst" value="' + m.inst + '">' +
+      (existing ? '<input type="hidden" name="paymentId" value="' + existing.id + '">' : "") +
+      '<div class="field"><label>المبلغ</label><input class="input" id="amount-input" type="number" min="0" step="0.01" name="amount" value="' + (existing?existing.amount:memberAmount(state,m.memberId)) + '" required>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' + quickAmountChips(state) + '</div></div>' +
+      '<div class="field" style="margin-top:10px"><label>التاريخ (ميلادي)</label><input class="input" type="date" name="date" data-action="preview-hijri" value="' + initialDate + '" required>' +
+      '<span class="hint" id="hijri-preview">الموافق: ' + hijriLabel(initialDate) + '</span></div>' +
+      '<div class="field" style="margin-top:10px"><label>ملاحظة (اختياري)</label><input class="input" name="note" value="' + esc(existing?existing.note||"":"") + '"></div>' +
+      '<div class="modal-actions">' +
+        (existing ? '<button type="button" class="btn btn-ghost" data-action="delete-payment" data-id="' + existing.id + '">حذف</button>' : "") +
+        '<button type="button" class="btn btn-ghost" data-action="close-modal">إلغاء</button>' +
+        '<button type="submit" class="btn btn-primary">حفظ</button>' +
+      '</div></form>');
+  }
+  if(m.type === "expense"){
+    var s = state.settings;
+    var catOpts = s.categories.map(function(c){return '<option value="' + esc(c) + '">' + esc(c) + '</option>';}).join("");
+    var memOpts = '<option value="">— بدون —</option>' + state.members.slice().sort(function(a,b){return a.name.localeCompare(b.name,"ar");}).map(function(mm){return '<option value="' + mm.id + '">' + esc(mm.name) + '</option>';}).join("");
+    return modalWrap('تسجيل مصروف',
+      '<form data-action="save-expense">' +
+      '<div class="field"><label>البند</label><select class="select" name="category" style="width:100%">' + catOpts + '</select></div>' +
+      '<div class="field" style="margin-top:10px"><label>المبلغ</label><input class="input" type="number" min="0" step="0.01" name="amount" required></div>' +
+      '<div class="field" style="margin-top:10px"><label>التاريخ (ميلادي)</label><input class="input" type="date" name="date" data-action="preview-hijri" value="' + todayISO() + '" required>' +
+      '<span class="hint" id="hijri-preview">الموافق: ' + hijriLabel(todayISO()) + '</span></div>' +
+      '<div class="field" style="margin-top:10px"><label>الوصف (اختياري)</label><input class="input" name="description"></div>' +
+      '<div class="field" style="margin-top:10px"><label>المستفيد (اختياري)</label><select class="select" name="beneficiaryId" style="width:100%">' + memOpts + '</select></div>' +
+      '<div class="modal-actions">' +
+        '<button type="button" class="btn btn-ghost" data-action="close-modal">إلغاء</button>' +
+        '<button type="submit" class="btn btn-primary">حفظ</button>' +
+      '</div></form>');
+  }
+  if(m.type === "grave"){
+    var gmem = state.members.find(function(x){return x.id===m.memberId;});
+    var gcase = (state.graveCases||[]).find(function(x){return x.id===m.caseId;});
+    var gexisting = graveContribution(state, m.memberId, m.caseId);
+    return modalWrap('مساهمة — ' + esc(gmem?gmem.name:"") + (gcase ? ' (' + esc(gcase.name) + ')' : ""),
+      '<div class="hint" style="margin-bottom:10px">اختر المبلغ المدفوع:</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        [25,50,75].map(function(v){
+          return '<button type="button" class="btn ' + (gexisting && gexisting.amount===v ? "btn-primary" : "btn-ghost") + '" data-action="set-grave-amount" data-value="' + v + '">' + fmtMoney(v, state.settings.currency) + '</button>';
+        }).join("") +
+      '</div>' +
+      '<div class="modal-actions">' +
+        (gexisting ? '<button type="button" class="btn btn-ghost" data-action="clear-grave-amount">إلغاء المساهمة</button>' : "") +
+        '<button type="button" class="btn btn-ghost" data-action="close-modal">إغلاق</button>' +
+      '</div>');
+  }
+  return "";
+}
+function quickAmountChips(state){
+  var presets = [100, 150, 200, state.settings.installmentAmount];
+  var seen = {};
+  return presets.filter(function(v){ if(!v || seen[v]) return false; seen[v]=true; return true; }).map(function(v){
+    return '<button type="button" class="btn btn-ghost btn-sm" data-action="quick-amount" data-value="' + v + '">' + fmtMoney(v, state.settings.currency) + '</button>';
+  }).join("");
+}
+function modalWrap(title, body){
+  return '<div class="modal-overlay" data-action="overlay-close"><div class="modal"><h2>' + title + '</h2>' + body + '</div></div>';
+}
+
+/* ---------- state mutation + publish ---------- */
+var artifactCap = null;
+var toastTimer = null;
+function showToast(msg){
+  UI.toast = msg;
+  render();
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ UI.toast = null; render(); }, 3200);
+}
+
+function cloneState(){ return JSON.parse(JSON.stringify(STATE)); }
+
+async function doPublish(mutate){
+  var prev = STATE;
+  var next = mutate(cloneState());
+  next.meta.updatedAt = new Date().toISOString();
+  STATE = next;
+  render();
+  if(!artifactCap){
+    STATE = prev;
+    UI.canWrite = false;
+    showToast("وضع معاينة: الحفظ غير متاح هنا.");
+    return;
+  }
+  try{
+    var html = buildFullDocument(STATE);
+    await artifactCap.publish(html);
+    /* view reloads automatically on success */
+  }catch(err){
+    var code = err && err.code;
+    if(code === "not_writer" || code === "not_granted" || code === "consent_required"){
+      STATE = prev;
+      UI.canWrite = false;
+      showToast("هذه الصفحة للعرض فقط. تواصل مع أمين الصندوق لإجراء التعديل.");
+      render();
+    } else if(code === "conflict"){
+      showToast("تم حفظ تحديث آخر، جاري تحديث الصفحة…");
+    } else {
+      STATE = prev;
+      showToast("تعذر الحفظ، حاول مرة أخرى.");
+      render();
+    }
+  }
+}
+
+function buildFullDocument(state){
+  var styleText = document.getElementById("app-style").textContent;
+  var scriptSrc = document.getElementById("app-logic").textContent;
+  var startMarker = "/*STATE_START*/";
+  var endMarker = "/*STATE_END*/";
+  var startIdx = scriptSrc.lastIndexOf(startMarker);
+  var endIdx = scriptSrc.lastIndexOf(endMarker);
+  var newStateBlock = startMarker + "\nvar STATE = " + JSON.stringify(state) + ";\n" + endMarker;
+  var newScript;
+  if(startIdx === -1 || endIdx === -1 || endIdx < startIdx){
+    newScript = scriptSrc + "\n" + newStateBlock;
+  } else {
+    newScript = scriptSrc.slice(0, startIdx) + newStateBlock + scriptSrc.slice(endIdx + endMarker.length);
+  }
+  var bodyHtml = renderApp(state, {activeTab:"overview", canWrite:true});
+  return "<!doctype html>\n<html lang=\"ar\" dir=\"rtl\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>" +
+    esc(state.meta.fundName) + "</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap\">\n<style id=\"app-style\">" +
+    styleText + "</style>\n</head>\n<body>\n<div id=\"app\">" + bodyHtml + "</div>\n<script id=\"app-logic\">" + newScript + "<" + "/script>\n</body>\n</html>";
+}
+
+/* ---------- events ---------- */
+var UI = {activeTab:"overview", search:"", page:1, modal:null, canWrite:null, toast:null, year:null};
+
+function render(){
+  var el = document.getElementById("app");
+  if(el) el.innerHTML = renderApp(STATE, UI);
+}
+
+function onClick(e){
+  var t = e.target.closest("[data-action]");
+  if(!t){
+    if(e.target.classList && e.target.classList.contains("modal-overlay")){ UI.modal=null; render(); }
+    return;
+  }
+  var action = t.getAttribute("data-action");
+  if(action === "switch-tab"){ UI.activeTab = t.getAttribute("data-tab"); UI.page=1; render(); }
+  else if(action === "page-prev"){ UI.page = Math.max(1,(UI.page||1)-1); render(); }
+  else if(action === "page-next"){ UI.page = (UI.page||1)+1; render(); }
+  else if(action === "close-modal" || action === "overlay-close"){ if(t===e.target || action==="close-modal"){ UI.modal=null; render(); } }
+  else if(action === "open-payment"){
+    var memberId = t.getAttribute("data-member"), inst = parseInt(t.getAttribute("data-inst"),10);
+    var info = memberYearInfo(STATE, memberId, currentViewYear(STATE, UI));
+    var existing = inst===1 ? info.inst1 : info.inst2;
+    UI.modal = {type:"payment", memberId:memberId, inst:inst, payment:existing}; render();
+  }
+  else if(action === "open-expense"){ UI.modal = {type:"expense"}; render(); }
+  else if(action === "open-grave-cell"){
+    var gMemberId = t.getAttribute("data-member"), gCaseId = t.getAttribute("data-case");
+    UI.modal = {type:"grave", memberId:gMemberId, caseId:gCaseId}; render();
+  }
+  else if(action === "set-grave-amount"){
+    var gVal = parseInt(t.getAttribute("data-value"),10);
+    var gMid = UI.modal.memberId, gCid = UI.modal.caseId;
+    UI.modal = null;
+    doPublish(function(s){
+      s.graveContributions = s.graveContributions || [];
+      var existing = s.graveContributions.find(function(g){return g.memberId===gMid && g.caseId===gCid;});
+      if(existing){ existing.amount = gVal; existing.date = todayISO(); }
+      else { s.graveContributions.push({id:uid("grv"), memberId:gMid, caseId:gCid, amount:gVal, date:todayISO()}); }
+      return s;
+    });
+  }
+  else if(action === "clear-grave-amount"){
+    var gMid2 = UI.modal.memberId, gCid2 = UI.modal.caseId;
+    UI.modal = null;
+    doPublish(function(s){
+      s.graveContributions = (s.graveContributions||[]).filter(function(g){ return !(g.memberId===gMid2 && g.caseId===gCid2); });
+      return s;
+    });
+  }
+  else if(action === "remove-grave-case"){
+    if(!confirm("حذف هذه الحالة وكل مساهماتها؟")) return;
+    var gCaseIdToRemove = t.getAttribute("data-id");
+    doPublish(function(s){
+      s.graveCases = (s.graveCases||[]).filter(function(c){return c.id!==gCaseIdToRemove;});
+      s.graveContributions = (s.graveContributions||[]).filter(function(g){return g.caseId!==gCaseIdToRemove;});
+      return s;
+    });
+  }
+  else if(action === "quick-amount"){
+    var amtInput = document.getElementById("amount-input");
+    if(amtInput) amtInput.value = t.getAttribute("data-value");
+  }
+  else if(action === "remove-category"){
+    var idx = parseInt(t.getAttribute("data-index"),10);
+    doPublish(function(s){ s.settings.categories.splice(idx,1); return s; });
+  }
+  else if(action === "delete-member"){
+    if(!confirm("حذف هذا العضو وكل دفعاته المسجلة؟")) return;
+    var id = t.getAttribute("data-id");
+    doPublish(function(s){
+      s.members = s.members.filter(function(m){return m.id!==id;});
+      s.payments = s.payments.filter(function(p){return p.memberId!==id;});
+      return s;
+    });
+  }
+  else if(action === "delete-expense"){
+    if(!confirm("حذف هذا المصروف؟")) return;
+    var eid = t.getAttribute("data-id");
+    doPublish(function(s){ s.expenses = s.expenses.filter(function(x){return x.id!==eid;}); return s; });
+  }
+  else if(action === "delete-payment"){
+    if(!confirm("حذف هذه الدفعة؟")) return;
+    var pid = t.getAttribute("data-id");
+    UI.modal = null;
+    doPublish(function(s){ s.payments = s.payments.filter(function(x){return x.id!==pid;}); return s; });
+  }
+  else if(action === "clear-demo"){
+    if(!confirm("سيتم حذف كل الأعضاء والحركات التجريبية نهائيًا. متابعة؟")) return;
+    doPublish(function(s){
+      var demoIds = s.members.filter(function(m){return m.isDemo;}).map(function(m){return m.id;});
+      s.members = s.members.filter(function(m){return !m.isDemo;});
+      s.payments = s.payments.filter(function(p){return demoIds.indexOf(p.memberId)===-1;});
+      s.expenses = s.expenses.filter(function(e){return !e.isDemo;});
+      return s;
+    });
+  }
+}
+
+function onInput(e){
+  var action = e.target.getAttribute("data-action");
+  if(action === "search"){
+    UI.search = e.target.value; UI.page = 1; render();
+    var input = document.querySelector('[data-action="search"]');
+    if(input){ input.focus(); input.selectionStart = input.selectionEnd = input.value.length; }
+  }
+  else if(action === "change-year"){
+    UI.year = parseInt(e.target.value,10); UI.page = 1; render();
+  }
+  else if(action === "preview-hijri"){
+    var el = document.getElementById("hijri-preview");
+    if(el) el.textContent = e.target.value ? ("الموافق: " + hijriLabel(e.target.value)) : "";
+  }
+}
+
+function onSubmit(e){
+  e.preventDefault();
+  var form = e.target;
+  var action = form.getAttribute("data-action");
+  var data = new FormData(form);
+
+  if(action === "save-settings"){
+    doPublish(function(s){
+      s.meta.fundName = data.get("fundName").trim() || s.meta.fundName;
+      s.settings.currency = data.get("currency").trim() || s.settings.currency;
+      s.settings.installmentAmount = parseFloat(data.get("installmentAmount")) || 0;
+      s.settings.currentYear = parseInt(data.get("currentYear"),10) || s.settings.currentYear;
+      return s;
+    });
+  }
+  else if(action === "add-category"){
+    var cat = (data.get("category")||"").trim();
+    if(!cat) return;
+    doPublish(function(s){ if(s.settings.categories.indexOf(cat)===-1) s.settings.categories.push(cat); return s; });
+    form.reset();
+  }
+  else if(action === "add-member"){
+    var name = (data.get("name")||"").trim();
+    if(!name) return;
+    doPublish(function(s){
+      var nextSeq = s.members.reduce(function(m,x){return Math.max(m, x.seq||0);}, 0) + 1;
+      s.members.push({id:uid("mem"), name:name, customAmount:null, isDemo:false, seq:nextSeq});
+      return s;
+    });
+    form.reset();
+  }
+  else if(action === "bulk-add-members"){
+    var names = (data.get("names")||"").split("\n").map(function(x){return x.trim();}).filter(Boolean);
+    if(!names.length) return;
+    doPublish(function(s){
+      var nextSeq = s.members.reduce(function(m,x){return Math.max(m, x.seq||0);}, 0);
+      names.forEach(function(n){ nextSeq++; s.members.push({id:uid("mem"), name:n, customAmount:null, isDemo:false, seq:nextSeq}); });
+      return s;
+    });
+    form.reset();
+  }
+  else if(action === "save-payment"){
+    var memberId = data.get("memberId"), inst = parseInt(data.get("inst"),10);
+    var amount = parseFloat(data.get("amount"))||0;
+    var date = data.get("date"); var note = (data.get("note")||"").trim();
+    var paymentId = data.get("paymentId");
+    UI.modal = null;
+    doPublish(function(s){
+      if(paymentId){
+        var pay = s.payments.find(function(p){return p.id===paymentId;});
+        if(pay){ pay.amount=amount; pay.date=date; pay.note=note; pay.year=hijriParts(date).year; }
+      } else {
+        s.payments.push({id:uid("pay"), memberId:memberId, year:hijriParts(date).year, installment:inst, amount:amount, date:date, note:note, type:"دفعة أساسية"});
+      }
+      return s;
+    });
+  }
+  else if(action === "add-grave-case"){
+    var dName = (data.get("deceasedName")||"").trim();
+    if(!dName) return;
+    var dDate = data.get("date") || todayISO();
+    var dNote = (data.get("note")||"").trim();
+    doPublish(function(s){
+      s.graveCases = s.graveCases || [];
+      s.graveCases.push({id:uid("case"), name:dName, date:dDate, note:dNote});
+      return s;
+    });
+    form.reset();
+  }
+  else if(action === "save-expense"){
+    var category = data.get("category"), eamount = parseFloat(data.get("amount"))||0;
+    var edate = data.get("date"), edesc = (data.get("description")||"").trim(), ben = data.get("beneficiaryId")||null;
+    UI.modal = null;
+    doPublish(function(s){
+      s.expenses.push({id:uid("exp"), category:category, amount:eamount, date:edate, description:edesc, beneficiaryId:ben||null, isDemo:false});
+      return s;
+    });
+  }
+}
+
+async function initCapability(){
+  try{
+    artifactCap = (typeof claude !== "undefined" && claude.use) ? await claude.use("artifact") : null;
+  }catch(err){ artifactCap = null; }
+  UI.canWrite = artifactCap ? null : false;
+  render();
+}
+
+function mount(){
+  var app = document.getElementById("app");
+  app.addEventListener("click", onClick);
+  app.addEventListener("input", onInput);
+  app.addEventListener("submit", onSubmit);
+  render();
+  initCapability();
+}
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", mount);
+} else { mount(); }
+
+/*STATE_START*/
+var STATE = {"meta":{"fundName":"صندوق العائلة","updatedAt":"2026-09-06T19:18:29.628Z"},"settings":{"currency":"ر.س","installmentAmount":500,"currentYear":1448,"categories":["دعم الأعضاء (زواج، مرض، وفاة)","مناسبات واجتماعات عائلية","مصاريف إدارية وتشغيلية","أخرى"]},"members":[{"id":"mem_12gky2b","name":"صالح بن محمد بن دواس ال سالم","customAmount":null,"isDemo":false,"seq":1},{"id":"mem_sru3kjf","name":"دواس بن صالح بن محمد دواس","customAmount":null,"isDemo":false,"seq":2},{"id":"mem_z9kf8og","name":"مانع بن صالح بن محمد دواس","customAmount":null,"isDemo":false,"seq":3},{"id":"mem_izljbwv","name":"محمد بن صالح بن محمد دواس","customAmount":null,"isDemo":false,"seq":4},{"id":"mem_4zf6y5n","name":"محسن بن صالح بن محمد دواس","customAmount":null,"isDemo":false,"seq":5},{"id":"mem_35330hm","name":"علي بن صالح بن محمد دواس","customAmount":null,"isDemo":false,"seq":6},{"id":"mem_ikgzf1y","name":"یحیى بن صالح بن محمد دواس","customAmount":null,"isDemo":false,"seq":7},{"id":"mem_2o5pa9w","name":"حسین بن صالح بن محمد دواس","customAmount":null,"isDemo":false,"seq":8},{"id":"mem_d1jze7e","name":"سعید بن حمد زمیع","customAmount":null,"isDemo":false,"seq":9},{"id":"mem_akc3j2j","name":"محمد بن سعید بن حمد بن زمیع","customAmount":null,"isDemo":false,"seq":10},{"id":"mem_22jmivo","name":"حمد بن سعید بن حمد بن زمیع","customAmount":null,"isDemo":false,"seq":11},{"id":"mem_8xutrhr","name":"محمد بن حمد زمیع","customAmount":null,"isDemo":false,"seq":12},{"id":"mem_54hwn3u","name":"سعید بن محمد بن حمد بن زمیع","customAmount":null,"isDemo":false,"seq":13},{"id":"mem_jsq4bte","name":"حمد بن محمد بن حمد بن زمیع","customAmount":null,"isDemo":false,"seq":14},{"id":"mem_5awz7vu","name":"عبد اللھ بن محمد بن حمد بن زمیع","customAmount":null,"isDemo":false,"seq":15},{"id":"mem_l2wuuwv","name":"ظافر بن محمد بن قراد ال شریان","customAmount":null,"isDemo":false,"seq":16},{"id":"mem_1jnqj05","name":"سالم بن ظافر بن محمد بن قراد","customAmount":null,"isDemo":false,"seq":17},{"id":"mem_driac5s","name":"محمد بن ظافر بن محمد بن قراد","customAmount":null,"isDemo":false,"seq":18},{"id":"mem_orbgutd","name":"فھد بن ظافر بن محمد بن قراد","customAmount":null,"isDemo":false,"seq":19},{"id":"mem_j4842su","name":"مانع بن ظافر بن محمد بن قراد","customAmount":null,"isDemo":false,"seq":20},{"id":"mem_pz0477i","name":"متعب بن ظافر بن محمد بن قراد","customAmount":null,"isDemo":false,"seq":21},{"id":"mem_i2qldb5","name":"نادر بن ظافر بن محمد بن قراد","customAmount":null,"isDemo":false,"seq":22},{"id":"mem_ty1jx67","name":"مانع بن محمد بن عمیسھ","customAmount":null,"isDemo":false,"seq":23},{"id":"mem_ybgjuqv","name":"محمد مانع بن محمد بن عمیسھ","customAmount":null,"isDemo":false,"seq":24},{"id":"mem_67sco9v","name":"عامر مانع بن محمد بن عمیسھ","customAmount":null,"isDemo":false,"seq":25},{"id":"mem_avma8ls","name":"صالح بن محمد بن عمیسھ","customAmount":null,"isDemo":false,"seq":26},{"id":"mem_5h7q1ew","name":"مرزوق بن محمد بن عمیسھ","customAmount":null,"isDemo":false,"seq":27},{"id":"mem_17y6kcz","name":"ظافر بن محمد بن عمیسھ","customAmount":null,"isDemo":false,"seq":28},{"id":"mem_73t8l2u","name":"محمد بن ظافر بن عمیسھ","customAmount":null,"isDemo":false,"seq":29},{"id":"mem_wxdaog0","name":"ناصر بن ظافر بن عمیسھ","customAmount":null,"isDemo":false,"seq":30},{"id":"mem_862fjgy","name":"محمد بن حمد بن عمیسھ","customAmount":null,"isDemo":false,"seq":31},{"id":"mem_tp5f23t","name":"صالح بن حمد بن عمیسة","customAmount":null,"isDemo":false,"seq":32},{"id":"mem_59fwvx8","name":"مانع بن حمد بن عمیسھ","customAmount":null,"isDemo":false,"seq":33},{"id":"mem_cbbzgnw","name":"حمد بن ناصر بن ھطیلان","customAmount":null,"isDemo":false,"seq":34},{"id":"mem_4kk613u","name":"ناصر بن حمد بن ناصر بن ھطیلان","customAmount":null,"isDemo":false,"seq":35},{"id":"mem_wjfwzxx","name":"مانع بن حمد بن ناصر بن ھطیلان","customAmount":null,"isDemo":false,"seq":36},{"id":"mem_33kk5hv","name":"محمد بن حمد بن ناصر بن ھطیلان","customAmount":null,"isDemo":false,"seq":37},{"id":"mem_m9vvlwb","name":"علي بن حمد بن ناصر بن ھطیلان","customAmount":null,"isDemo":false,"seq":38},{"id":"mem_ydcpf3r","name":"فھد بن حمد بن ناصر بن ھطیلان","customAmount":null,"isDemo":false,"seq":39},{"id":"mem_graf46n","name":"مھدي بن حمد بن ناصر بن ھطیلان","customAmount":null,"isDemo":false,"seq":40},{"id":"mem_acnbqgu","name":"منصور بن حمد بن ناصر بن ھطیلان","customAmount":null,"isDemo":false,"seq":41},{"id":"mem_s3avkfo","name":"علي عامر فدغاء ال شریان","customAmount":null,"isDemo":false,"seq":42},{"id":"mem_n1tb8uz","name":"مھدي علي عامر فدغاء ال شریان","customAmount":null,"isDemo":false,"seq":43},{"id":"mem_leq6g8f","name":"سالم علي عامر فدغاء ال شریان","customAmount":null,"isDemo":false,"seq":44},{"id":"mem_wwz4t7z","name":"فھد علي عامر فدغاء ال شریان","customAmount":null,"isDemo":false,"seq":45},{"id":"mem_jk8vd2o","name":"محمد عامر فدغاء ال شریان","customAmount":null,"isDemo":false,"seq":46},{"id":"mem_83icown","name":"عامر محمد عامر ال شریان","customAmount":null,"isDemo":false,"seq":47},{"id":"mem_qprgdha","name":"مانع بن محمد بن یحیى آل شریان","customAmount":null,"isDemo":false,"seq":48},{"id":"mem_apvesbk","name":"حمد بن مانع بن محمد یحیى آل شریان","customAmount":null,"isDemo":false,"seq":49},{"id":"mem_678auc0","name":"یحیى مانع بن محمد بن یحیى آل شریان","customAmount":null,"isDemo":false,"seq":50},{"id":"mem_4u7p5o5","name":"محمد بن مانع بن محمد یحیى آل شریان","customAmount":null,"isDemo":false,"seq":51},{"id":"mem_cvqkzfy","name":"مفلح بن مانع بن محمد یحیى آل شریان","customAmount":null,"isDemo":false,"seq":52},{"id":"mem_7bukywl","name":"سعود بن مانع بن محمد یحیى آل شریان","customAmount":null,"isDemo":false,"seq":53},{"id":"mem_2v9biv5","name":"إبراھیم مانع محمد یحیى آل سالم","customAmount":null,"isDemo":false,"seq":54},{"id":"mem_uygd3sf","name":"یحیى حمد یحیى ال شریان","customAmount":null,"isDemo":false,"seq":55},{"id":"mem_52jg7h4","name":"مانع بن حسین بن عویره","customAmount":null,"isDemo":false,"seq":56},{"id":"mem_7ttlhjr","name":"حسین مانع حسین عویره","customAmount":null,"isDemo":false,"seq":57},{"id":"mem_zlnyfqy","name":"ناصر مانع حسین عویره","customAmount":null,"isDemo":false,"seq":58},{"id":"mem_9x886n1","name":"ناصر حشان","customAmount":null,"isDemo":false,"seq":59},{"id":"mem_t451lbl","name":"فھد ناصر حشان","customAmount":null,"isDemo":false,"seq":60},{"id":"mem_odef5pu","name":"صالح ناصر حشان","customAmount":null,"isDemo":false,"seq":61},{"id":"mem_8w5w06y","name":"محمد ناصر حشان","customAmount":null,"isDemo":false,"seq":62},{"id":"mem_uokl8z4","name":"عبدالرحمن ناصر حشان ال شریان","customAmount":null,"isDemo":false,"seq":63},{"id":"mem_3hl84th","name":"فھد حشان","customAmount":null,"isDemo":false,"seq":64},{"id":"mem_bk8poup","name":"علي فھد حشان","customAmount":null,"isDemo":false,"seq":65},{"id":"mem_mw9xj9f","name":"حشان فھد حشان","customAmount":null,"isDemo":false,"seq":66},{"id":"mem_abod958","name":"مانع فھد مانع ال شریان","customAmount":null,"isDemo":false,"seq":67},{"id":"mem_k25zuru","name":"حسن مانع فھد ال شریان","customAmount":null,"isDemo":false,"seq":68},{"id":"mem_2mrjprf","name":"فھد مانع فھد ال شریان","customAmount":null,"isDemo":false,"seq":69},{"id":"mem_uzo9r18","name":"سالم مانع فھد ال شریان","customAmount":null,"isDemo":false,"seq":70},{"id":"mem_pwhy8v9","name":"سالم بن علي بن عزمان","customAmount":null,"isDemo":false,"seq":71},{"id":"mem_np75vak","name":"حمد بن علي عزمان","customAmount":null,"isDemo":false,"seq":72},{"id":"mem_m3wyj0f","name":"علي حمد علي عزمان","customAmount":null,"isDemo":false,"seq":73},{"id":"mem_99xrm55","name":"ابراھیم علي حمد عزمان ال شریان","customAmount":null,"isDemo":false,"seq":74},{"id":"mem_pywm4kg","name":"سالم حمد علي عزمان","customAmount":null,"isDemo":false,"seq":75},{"id":"mem_pq8n8vv","name":"یحي حمد علي عزمان","customAmount":null,"isDemo":false,"seq":76},{"id":"mem_m97v89y","name":"مانع حمد علي عزمان","customAmount":null,"isDemo":false,"seq":77},{"id":"mem_1h4qx86","name":"ناصر حمد علي عزمان","customAmount":null,"isDemo":false,"seq":78},{"id":"mem_ftacvi1","name":"محمد حمد علي عزمان","customAmount":null,"isDemo":false,"seq":79},{"id":"mem_lfawdt0","name":"سالم علي حمد علي عزمان","customAmount":null,"isDemo":false,"seq":80},{"id":"mem_k9f6ixb","name":"یوسف علي حمد علي عزمان","customAmount":null,"isDemo":false,"seq":81},{"id":"mem_49f0s08","name":"حمد سالم حمد علي عزمان","customAmount":null,"isDemo":false,"seq":82},{"id":"mem_hn7gvvl","name":"علي مانع علي عزمان","customAmount":null,"isDemo":false,"seq":83},{"id":"mem_zq0nz9z","name":"محمد مانع علي عزمان","customAmount":null,"isDemo":false,"seq":84},{"id":"mem_gw2w7q1","name":"حمد مانع علي عزمان","customAmount":null,"isDemo":false,"seq":85},{"id":"mem_1kt53y9","name":"نایف سالم صومان ال سالم","customAmount":null,"isDemo":false,"seq":86},{"id":"mem_8sssyg8","name":"فھد نایف سالم ال سالم","customAmount":null,"isDemo":false,"seq":87},{"id":"mem_ydcf78p","name":"مشاري نایف سالم ال سالم","customAmount":null,"isDemo":false,"seq":88},{"id":"mem_619coyy","name":"نواف نایف سالم ال سالم","customAmount":null,"isDemo":false,"seq":89},{"id":"mem_8u7g8nd","name":"راكان نایف سالم الیامي","customAmount":null,"isDemo":false,"seq":90},{"id":"mem_wwhvtsz","name":"ھادي سالم صومان","customAmount":null,"isDemo":false,"seq":91},{"id":"mem_zgo5hby","name":"ناصر ھادي سالم صومان","customAmount":null,"isDemo":false,"seq":92},{"id":"mem_w1h0duo","name":"مانع سالم صومان ال سالم","customAmount":null,"isDemo":false,"seq":93},{"id":"mem_is55gu7","name":"عبداللھ مانع سالم صومان ال سالم","customAmount":null,"isDemo":false,"seq":94},{"id":"mem_rjzit4r","name":"عبدالرحمن مانع سالم صومان ال سالم","customAmount":null,"isDemo":false,"seq":95},{"id":"mem_crqz29q","name":"فھد مانع سالم صومان ال سالم","customAmount":null,"isDemo":false,"seq":96},{"id":"mem_4ylou2d","name":"سالم مانع سالم صومان ال سالم","customAmount":null,"isDemo":false,"seq":97},{"id":"mem_5p5cl9o","name":"عبداللھ سالم صومان","customAmount":null,"isDemo":false,"seq":98},{"id":"mem_v8kku55","name":"سالم عبداللھ سالم صومان","customAmount":null,"isDemo":false,"seq":99},{"id":"mem_xhekyqy","name":"محمد عبداللھ سالم صومان","customAmount":null,"isDemo":false,"seq":100},{"id":"mem_mo9crdg","name":"فھد عبداللھ سالم صومان ال سالم","customAmount":null,"isDemo":false,"seq":101},{"id":"mem_xrqd6rh","name":"ناصر سالم صومان","customAmount":null,"isDemo":false,"seq":102},{"id":"mem_hxni72z","name":"ھادي ناصر سالم صومان ال سالم","customAmount":null,"isDemo":false,"seq":103},{"id":"mem_ne8kroi","name":"سالم ناصر سالم صومان ال سالم","customAmount":null,"isDemo":false,"seq":104},{"id":"mem_csf6rlx","name":"فھد سالم صومان ال سالم","customAmount":null,"isDemo":false,"seq":105},{"id":"mem_7rwlp3t","name":"مھدي إبراھیم دوحان آل سالم","customAmount":null,"isDemo":false,"seq":106},{"id":"mem_zje4sio","name":"حاتم مھدي إبراھیم دوحان","customAmount":null,"isDemo":false,"seq":107},{"id":"mem_f51ig3c","name":"ابراھیم مھدي ابراھیم دوحان","customAmount":null,"isDemo":false,"seq":108},{"id":"mem_ioqwpaq","name":"علي بن عامر غانم ال سالم","customAmount":null,"isDemo":false,"seq":109},{"id":"mem_rmz0z9g","name":"عامر بن علي عامر ال سالم","customAmount":null,"isDemo":false,"seq":110},{"id":"mem_0frn0pf","name":"صالح بن علي عامر ال سالم","customAmount":null,"isDemo":false,"seq":111},{"id":"mem_8c1aui1","name":"حسین بن علي عامر ال سالم","customAmount":null,"isDemo":false,"seq":112},{"id":"mem_0l6xah1","name":"مانع بن علي عامر ال سالم","customAmount":null,"isDemo":false,"seq":113},{"id":"mem_xa2naww","name":"صالح عامر بن علي ال سالم","customAmount":null,"isDemo":false,"seq":114},{"id":"mem_02rb1tc","name":"علي عامر بن علي ال سالم","customAmount":null,"isDemo":false,"seq":115},{"id":"mem_v4420op","name":"جواد صالح بن علي ال سالم","customAmount":null,"isDemo":false,"seq":116},{"id":"mem_jr6xkvo","name":"وضاح صالح بن علي ال سالم","customAmount":null,"isDemo":false,"seq":117},{"id":"mem_fijqqoe","name":"علي حسین بن علي ال سالم","customAmount":null,"isDemo":false,"seq":118},{"id":"mem_ricm4t4","name":"محمد حسین بن علي ال سالم","customAmount":null,"isDemo":false,"seq":119},{"id":"mem_iklj0hu","name":"صالح حسین بن علي عامر","customAmount":null,"isDemo":false,"seq":120},{"id":"mem_twsv2x5","name":"إبراھیم حسین بن علي ال سالم","customAmount":null,"isDemo":false,"seq":121},{"id":"mem_zx3evmg","name":"فارس مانع بن علي ال سالم","customAmount":null,"isDemo":false,"seq":122},{"id":"mem_gbua3mm","name":"عامر مانع بن علي ال سالم","customAmount":null,"isDemo":false,"seq":123},{"id":"mem_tksolge","name":"عمار مانع بن علي ال سالم","customAmount":null,"isDemo":false,"seq":124},{"id":"mem_m44yxmt","name":"حسین مانع علي عامر ال سالم","customAmount":null,"isDemo":false,"seq":125},{"id":"mem_5w9yxc4","name":"الیاس صالح علي عامر ال سالم","customAmount":null,"isDemo":false,"seq":126},{"id":"mem_kourlsm","name":"سالم بن عامر بن غانم ال سالم","customAmount":null,"isDemo":false,"seq":127},{"id":"mem_v83pzo6","name":"علي سالم بن عامر ال سالم","customAmount":null,"isDemo":false,"seq":128},{"id":"mem_qgqxqhp","name":"عامر سالم بن عامر ال سالم","customAmount":null,"isDemo":false,"seq":129},{"id":"mem_rj571ey","name":"حمد سالم بن عامر ال سالم","customAmount":null,"isDemo":false,"seq":130},{"id":"mem_70kmydi","name":"دواس سالم بن عامر ال سالم","customAmount":null,"isDemo":false,"seq":131},{"id":"mem_2n4r4gq","name":"فھد سالم بن عامر ال سالم","customAmount":null,"isDemo":false,"seq":132},{"id":"mem_t67umeo","name":"عامر علي بن سالم بن عامر","customAmount":null,"isDemo":false,"seq":133},{"id":"mem_a6acbnk","name":"سالم علي بن سالم بن عامر","customAmount":null,"isDemo":false,"seq":134},{"id":"mem_hg5hury","name":"محمد علي بن سالم بن عامر","customAmount":null,"isDemo":false,"seq":135},{"id":"mem_ncnne1y","name":"سالم عامر بن سالم بن عامر","customAmount":null,"isDemo":false,"seq":136},{"id":"mem_tm631h6","name":"سعد عامر بن سالم بن عامر","customAmount":null,"isDemo":false,"seq":137},{"id":"mem_jxdn1o5","name":"علي عامر بن سالم بن عامر","customAmount":null,"isDemo":false,"seq":138},{"id":"mem_bgpvpai","name":"علي دواس بن سالم بن عامر","customAmount":null,"isDemo":false,"seq":139},{"id":"mem_whfuu9o","name":"حسین عامر بن سالم بن عامر","customAmount":null,"isDemo":false,"seq":140}],"payments":[{"id":"pay_lp2ljqq","memberId":"mem_12gky2b","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_lzkie6s","memberId":"mem_sru3kjf","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_mn93sxi","memberId":"mem_z9kf8og","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_rmmpjwf","memberId":"mem_izljbwv","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_w4i373x","memberId":"mem_4zf6y5n","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_0h32jzs","memberId":"mem_35330hm","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_ew0uk2g","memberId":"mem_ikgzf1y","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_t919j48","memberId":"mem_2o5pa9w","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_8acdqh6","memberId":"mem_d1jze7e","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_i0nffxq","memberId":"mem_akc3j2j","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_ppubddx","memberId":"mem_22jmivo","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_d8kkguz","memberId":"mem_8xutrhr","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_mzzpzcn","memberId":"mem_54hwn3u","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_s44gimq","memberId":"mem_jsq4bte","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_p1za5ne","memberId":"mem_5awz7vu","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_rgvqdo3","memberId":"mem_l2wuuwv","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_bwaw717","memberId":"mem_1jnqj05","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_s3srz90","memberId":"mem_driac5s","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_s9f5uft","memberId":"mem_orbgutd","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_q5qfk4k","memberId":"mem_j4842su","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_2fdqqmo","memberId":"mem_pz0477i","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_t6c6kls","memberId":"mem_i2qldb5","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_7msqs50","memberId":"mem_ty1jx67","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_3eg28b4","memberId":"mem_ybgjuqv","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_61htij1","memberId":"mem_67sco9v","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_wrz0ed1","memberId":"mem_avma8ls","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_ytysiws","memberId":"mem_5h7q1ew","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_wcpgrzk","memberId":"mem_17y6kcz","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_4r3o2em","memberId":"mem_73t8l2u","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_6sk835t","memberId":"mem_wxdaog0","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_cevwbbd","memberId":"mem_862fjgy","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_os5w1g4","memberId":"mem_tp5f23t","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_iice9os","memberId":"mem_59fwvx8","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_8nmtzoa","memberId":"mem_cbbzgnw","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_ufq4eqn","memberId":"mem_4kk613u","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_ks3xgd5","memberId":"mem_wjfwzxx","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_47bfidb","memberId":"mem_33kk5hv","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_eekj11o","memberId":"mem_m9vvlwb","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_9dcux5u","memberId":"mem_ydcpf3r","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_dhkrcac","memberId":"mem_graf46n","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_t2h7tks","memberId":"mem_acnbqgu","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_so8dmi9","memberId":"mem_s3avkfo","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_sgxkxg2","memberId":"mem_n1tb8uz","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_i08rm6r","memberId":"mem_leq6g8f","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_fuuqzct","memberId":"mem_wwz4t7z","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_qmowdlb","memberId":"mem_jk8vd2o","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_k26eacq","memberId":"mem_83icown","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_xwmo3aw","memberId":"mem_qprgdha","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_hhezams","memberId":"mem_apvesbk","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_k5i788h","memberId":"mem_678auc0","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_7ijyme8","memberId":"mem_4u7p5o5","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_vz5ribw","memberId":"mem_cvqkzfy","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_thi2dv3","memberId":"mem_7bukywl","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_abjkifg","memberId":"mem_2v9biv5","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_cc44i7q","memberId":"mem_uygd3sf","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_aqdhbiz","memberId":"mem_52jg7h4","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_mqciztk","memberId":"mem_7ttlhjr","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_3w16tcq","memberId":"mem_zlnyfqy","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_8xuuozo","memberId":"mem_9x886n1","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_vwa8m9k","memberId":"mem_t451lbl","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_ulzaz3t","memberId":"mem_odef5pu","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_tlnatur","memberId":"mem_8w5w06y","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_hbp2gd7","memberId":"mem_uokl8z4","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_ghhqrqw","memberId":"mem_3hl84th","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_qbvk9q0","memberId":"mem_bk8poup","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_c0b18hw","memberId":"mem_mw9xj9f","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_uksdln1","memberId":"mem_abod958","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_0yjsi6k","memberId":"mem_k25zuru","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_dwlptsc","memberId":"mem_2mrjprf","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_jb4oxhg","memberId":"mem_uzo9r18","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_tctplyd","memberId":"mem_pwhy8v9","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_14q3fmp","memberId":"mem_np75vak","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_tholjoz","memberId":"mem_m3wyj0f","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_b4k4ebb","memberId":"mem_99xrm55","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_1leq05d","memberId":"mem_pywm4kg","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_jvh7amz","memberId":"mem_pq8n8vv","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_9ke689w","memberId":"mem_m97v89y","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_dfyuj12","memberId":"mem_1h4qx86","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_4p4fpzi","memberId":"mem_ftacvi1","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_mxbym04","memberId":"mem_lfawdt0","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_fixytzw","memberId":"mem_k9f6ixb","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_0sy88g2","memberId":"mem_49f0s08","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_yrwbobz","memberId":"mem_hn7gvvl","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_ozieoqu","memberId":"mem_zq0nz9z","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_zby049z","memberId":"mem_gw2w7q1","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_y7b26jx","memberId":"mem_1kt53y9","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_1xv5iv8","memberId":"mem_8sssyg8","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_px21sqg","memberId":"mem_ydcf78p","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_2dur9gm","memberId":"mem_619coyy","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_2fqae3w","memberId":"mem_8u7g8nd","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_utbb9ij","memberId":"mem_wwhvtsz","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_u02w420","memberId":"mem_zgo5hby","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_w2a3bgk","memberId":"mem_w1h0duo","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_5n0b1w6","memberId":"mem_is55gu7","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_fbah8gt","memberId":"mem_rjzit4r","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_veekglb","memberId":"mem_crqz29q","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_7ttr10k","memberId":"mem_4ylou2d","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_1i4j8xn","memberId":"mem_5p5cl9o","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_aayelqe","memberId":"mem_v8kku55","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_4knk23l","memberId":"mem_xhekyqy","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_u1c5ljp","memberId":"mem_mo9crdg","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_0ddb043","memberId":"mem_xrqd6rh","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_sp7ibii","memberId":"mem_hxni72z","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_dw6u7nt","memberId":"mem_ne8kroi","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_b8wtea0","memberId":"mem_csf6rlx","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_dloj094","memberId":"mem_7rwlp3t","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_pd8n8fq","memberId":"mem_zje4sio","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_jwuyrjv","memberId":"mem_f51ig3c","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_m6bu2rj","memberId":"mem_ioqwpaq","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_zhhmxe7","memberId":"mem_rmz0z9g","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_lqdd9jr","memberId":"mem_0frn0pf","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_mr689ap","memberId":"mem_8c1aui1","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_qg2vv98","memberId":"mem_0l6xah1","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_c2kg36u","memberId":"mem_xa2naww","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_wnc87kc","memberId":"mem_02rb1tc","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_zzp3ryc","memberId":"mem_v4420op","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_2ywy1ed","memberId":"mem_jr6xkvo","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_ck9frfh","memberId":"mem_fijqqoe","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_qvrd1a8","memberId":"mem_ricm4t4","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_byvmlzh","memberId":"mem_iklj0hu","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_iwgn4s6","memberId":"mem_twsv2x5","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_lwonw9i","memberId":"mem_zx3evmg","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_wvwvf51","memberId":"mem_gbua3mm","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_9faivlt","memberId":"mem_tksolge","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_3lht34k","memberId":"mem_m44yxmt","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_z07nvzy","memberId":"mem_5w9yxc4","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_c28yxvx","memberId":"mem_kourlsm","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_g4z1p3h","memberId":"mem_v83pzo6","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_7xz5el1","memberId":"mem_qgqxqhp","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_gbim8f0","memberId":"mem_rj571ey","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_v08bltu","memberId":"mem_70kmydi","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_zkynjhp","memberId":"mem_2n4r4gq","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_s38ifvy","memberId":"mem_t67umeo","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_1xlmuul","memberId":"mem_a6acbnk","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_8wqymnl","memberId":"mem_hg5hury","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_8cvr25e","memberId":"mem_ncnne1y","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_vjlx0hw","memberId":"mem_tm631h6","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_c8avq1v","memberId":"mem_jxdn1o5","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_64kvx9r","memberId":"mem_bgpvpai","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"},{"id":"pay_2jm1czq","memberId":"mem_whfuu9o","year":1448,"installment":1,"amount":150,"date":"2026-06-16","note":"","type":"دفعة أساسية"}],"expenses":[],"graveCases":[{"id":"case_mcblyhd","name":"فلان بن فلان","date":"2026-09-06","note":""},{"id":"case_6pkgw27","name":"فلان بن فلان 2","date":"2026-09-06","note":""}],"graveContributions":[{"id":"grv_w3ia8rm","memberId":"mem_12gky2b","caseId":"case_mcblyhd","amount":75,"date":"2026-09-06"},{"id":"grv_w66d8zf","memberId":"mem_sru3kjf","caseId":"case_mcblyhd","amount":75,"date":"2026-09-06"}]};
+/*STATE_END*/
+</script>
+</body>
+</html>
