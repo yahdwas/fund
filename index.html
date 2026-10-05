@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>جمعية ال زايد</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700&family=Amiri:wght@700&display=swap">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';document.head.appendChild(s)"></script>
 <style id="app-style">
 /* ===== ألوان ومتغيرات الموقع (مكان واحد لكل الألوان) ===== */
 :root{
@@ -535,16 +535,71 @@ tbody tr:hover{background:var(--surface-2)}
  .stat-card .stat-value{font-size:21px;margin-top:8px}
  .kpi-ic{width:36px;height:36px;border-radius:11px}
 }
+
+/* ===== v1.0.0: أرقام، نسخة، جوال ===== */
+.money{white-space:nowrap;display:inline-flex;align-items:baseline;gap:.3em}
+.m-num{font-variant-numeric:tabular-nums}
+.m-cur{font-size:.6em;font-weight:600;opacity:.6}
+.sf-user{display:flex;flex-direction:column;line-height:1.35;min-width:0}
+.app-ver{font-size:10.5px;color:var(--side-muted);opacity:.8;direction:ltr;text-align:right;font-variant-numeric:tabular-nums}
+.auth-ver{text-align:center;font-size:11px;color:var(--text-muted);opacity:.7;margin-top:14px;direction:ltr}
+.auth-alert{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;background:var(--critical-soft);color:var(--critical);border-radius:12px;padding:14px 16px;margin:6px 0 16px}
+.auth-alert .ic{width:26px;height:26px}
+.auth-alert p{margin:0;font-size:13.5px;font-weight:600;color:var(--text)}
+.mem-filter{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.late-tag{display:inline-block;font-size:10.5px;font-weight:700;color:var(--critical);background:var(--critical-soft);border-radius:99px;padding:1px 8px;margin-inline-start:8px;vertical-align:middle;white-space:nowrap}
+.nav-btn .ns,.nav-more,.more-sheet,.more-back{display:none}
+@media (max-width:760px){
+ .side{position:fixed;top:auto;bottom:0;left:0;right:0;width:auto;height:auto;padding:5px 6px calc(5px + env(safe-area-inset-bottom));z-index:60;overflow:visible;border-top:1px solid rgba(255,255,255,.08);box-shadow:0 -6px 20px rgba(0,0,0,.18)}
+ .s-brand,.side-foot{display:none}
+ .nav{flex:1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+ .nav-btn{flex-direction:column;justify-content:center;gap:3px;padding:7px 2px 6px;font-size:11px;font-weight:600;white-space:nowrap;text-align:center}
+ .nav-btn .ic{width:21px;height:21px}
+ .nav-btn .nl{display:none}
+ .nav-btn .ns{display:block;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ .nav-btn.nb-sec{display:none}
+ .nav-btn.nav-more{display:flex}
+ .nav-btn em{position:absolute;top:1px;left:calc(50% - 26px);margin:0;font-size:10px;line-height:16px;padding:0 5px}
+ .more-back{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:58}
+ .more-sheet{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:fixed;left:8px;right:8px;bottom:calc(70px + env(safe-area-inset-bottom));z-index:59;background:var(--side-bg);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px;box-shadow:var(--shadow-lg)}
+ .more-sheet .nav-btn{flex-direction:row;justify-content:flex-start;gap:10px;padding:12px;font-size:13.5px;background:rgba(255,255,255,.04)}
+ .more-sheet .nav-btn .nl{display:block}
+ .more-sheet .nav-btn .ns{display:none}
+ .more-ver{grid-column:1/-1;text-align:center;font-size:11px;color:var(--side-muted);padding-top:4px}
+ .top{padding:12px 14px}
+ .panel{padding:14px 12px calc(92px + env(safe-area-inset-bottom))}
+ .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .stat-card .stat-value{font-size:19px}
+ .mem-table thead{display:none}
+ .mem-table,.mem-table tbody{display:block;min-width:0}
+ .table-wrap:has(.mem-table){border:0;overflow:visible}
+ .mem-table tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px;padding:12px;margin-bottom:10px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+ .mem-table td{display:block;padding:0;border:0}
+ .mem-table td[colspan]{grid-column:1/-1;text-align:center}
+ .mem-table .seq-cell{display:none}
+ .mem-table .name-cell{grid-column:1/-1;font-size:15px;padding-bottom:4px;border-bottom:1px dashed var(--border)}
+ .mem-table td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:var(--text-muted);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .mem-table .status-btn{width:100%}
+ .mem-table .total-cell{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;border-top:1px dashed var(--border);padding-top:8px}
+ .mem-table .total-cell::before{margin:0}
+}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script id="app-logic">
 "use strict";
+/* رقم نسخة الموقع: يظهر أسفل القائمة وفي شاشة الدخول. زِده مع كل تحديث */
+var APP_VERSION = "1.0.0";
 
 /* ---------- helpers ---------- */
 function uid(prefix){ return (prefix||"id") + "_" + Math.random().toString(36).slice(2,9); }
 function todayISO(){ return new Date().toISOString().slice(0,10); }
+/* نفس fmtMoney لكن بصيغة HTML: الرقم بخط واضح والعملة أصغر وأخف */
+function fmtMoneyHtml(n, cur){
+  var t = fmtMoney(n, cur), i = t.lastIndexOf("\u00A0");
+  return '<span class="money"><span class="m-num">' + esc(t.slice(0, i)) + '</span><span class="m-cur">' + esc(t.slice(i + 1)) + '</span></span>';
+}
 function fmtMoney(n, cur){
   var v = Math.round((n||0) * 100) / 100;
   return v.toLocaleString("en-US", {minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits:2}) + "\u00A0" + (cur || STATE.settings.currency);
@@ -801,6 +856,8 @@ var ICONS = {
   plus:'<path d="M5 12h14M12 5v14"/>',
   logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
   campaign:'<path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/><path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 16 6 6"/><circle cx="16" cy="9" r="2.9"/><circle cx="6" cy="5" r="3"/>',
+  alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
+  more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
   fund:'<path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/>'
 };
 function icon(n){ return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n]||"") + '</svg>'; }
@@ -810,9 +867,9 @@ function renderApp(state, ui){
   return '<div class="shell"><aside class="side">' +
       '<div class="s-brand"><div class="bmark">ز</div><div><div class="b-name">' + esc(state.meta.fundName) + '</div><div class="b-sub">صندوق العائلة</div></div></div>' +
       '<nav class="nav tabs" role="tablist">' + renderTabs(ui, lateN) + '</nav>' +
-      '<div class="side-foot"><span>' + esc(ME ? (ME.display_name || ME.username) : '') + '</span><button type="button" class="side-theme" data-action="toggle-theme" aria-label="تبديل الوضع">' + icon(dark ? "sun" : "moon") + (dark ? 'فاتح' : 'ليلي') + '</button></div>' +
+      '<div class="side-foot"><div class="sf-user"><span>' + esc(ME ? (ME.display_name || ME.username) : '') + '</span><small class="app-ver">v' + APP_VERSION + '</small></div><button type="button" class="side-theme" data-action="toggle-theme" aria-label="تبديل الوضع">' + icon(dark ? "sun" : "moon") + (dark ? 'فاتح' : 'ليلي') + '</button></div>' +
     '</aside><div class="main">' + renderTopbar(state, ui) +
-    '<div class="panel">' + renderTabContent(state, ui) + '</div></div></div>' +
+    '<div class="panel">' + renderTabContent(state, ui) + '</div></div></div>' + renderMoreSheet(ui, lateN) +
     (ui.modal ? renderModal(state, ui) : "") +
     (ui.toast ? '<div class="toast">' + esc(ui.toast) + '</div>' : "");
 }
@@ -836,18 +893,32 @@ function renderTopbar(state, ui){
 
 var TABS = [
   {id:"overview", label:"نظرة عامة"},
-  {id:"members", label:"الأعضاء والدفعات"},
+  {id:"members", label:"الأعضاء والدفعات", short:"الأعضاء"},
   {id:"late", label:"المتأخرون"},
   {id:"grave", label:"القبر"},
   {id:"expenses", label:"المصروفات"},
-  {id:"log", label:"سجل الدفعات"},
+  {id:"log", label:"سجل الدفعات", short:"السجل"},
   {id:"reports", label:"التقارير"},
   {id:"admin", label:"الإدارة"}
 ];
+/* في الجوال تظهر هذي الأقسام في الشريط السفلي، والباقي تحت «المزيد» */
+var MOBILE_TABS = ["overview", "members", "late", "log"];
+function visibleTabs(ui){ return TABS.filter(function(t){ return !(t.id === "admin" && ui.canWrite === false); }); }
+function tabBtn(t, ui, lateN, cls){
+  return '<button class="nav-btn' + (cls ? ' ' + cls : '') + (ui.activeTab===t.id?" active":"") + '" data-action="switch-tab" data-tab="' + t.id + '">' + icon(t.id) + '<span class="nl">' + t.label + '</span><span class="ns">' + (t.short || t.label) + '</span>' + (t.id === "late" && lateN ? '<em>' + lateN + '</em>' : '') + '</button>';
+}
 function renderTabs(ui, lateN){
-  return TABS.filter(function(t){ return !(t.id === "admin" && ui.canWrite === false); }).map(function(t){
-    return '<button class="nav-btn' + (ui.activeTab===t.id?" active":"") + '" data-action="switch-tab" data-tab="' + t.id + '">' + icon(t.id) + '<span>' + t.label + '</span>' + (t.id === "late" && lateN ? '<em>' + lateN + '</em>' : '') + '</button>';
-  }).join("");
+  var moreOn = MOBILE_TABS.indexOf(ui.activeTab) < 0;
+  return visibleTabs(ui).map(function(t){ return tabBtn(t, ui, lateN, MOBILE_TABS.indexOf(t.id) < 0 ? "nb-sec" : ""); }).join("") +
+    '<button class="nav-btn nav-more' + (moreOn || ui.moreOpen ? ' active' : '') + '" data-action="toggle-more" aria-expanded="' + (ui.moreOpen ? 'true' : 'false') + '">' + icon("more") + '<span class="ns">المزيد</span></button>';
+}
+function renderMoreSheet(ui, lateN){
+  if(!ui.moreOpen) return "";
+  var dark = currentTheme() === "dark";
+  return '<div class="more-back" data-action="toggle-more"></div><div class="more-sheet" role="menu">' +
+    visibleTabs(ui).filter(function(t){ return MOBILE_TABS.indexOf(t.id) < 0; }).map(function(t){ return tabBtn(t, ui, lateN, "more-item"); }).join("") +
+    '<button type="button" class="nav-btn more-item" data-action="toggle-theme">' + icon(dark ? "sun" : "moon") + '<span class="nl">' + (dark ? 'الوضع الفاتح' : 'الوضع الليلي') + '</span></button>' +
+    '<div class="more-ver">' + esc(ME ? (ME.display_name || ME.username) : '') + ' · v' + APP_VERSION + '</div></div>';
 }
 function payLabel(state, p){
   if(p.type === "دفعة أساسية") return periodName(state, p.year, p.installment);
@@ -921,7 +992,7 @@ function renderOverviewTab(state, ui){
     var pct = Math.round((v/maxCat)*100);
     return '<div class="bar-row"><div class="bar-label">' + esc(c) + '</div>' +
       '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>' +
-      '<div class="bar-value">' + fmtMoney(v, state.settings.currency) + '</div></div>';
+      '<div class="bar-value">' + fmtMoneyHtml(v, state.settings.currency) + '</div></div>';
   }).join("");
 
   var activity = state.payments.map(function(p){
@@ -933,13 +1004,13 @@ function renderOverviewTab(state, ui){
 
   var activityHtml = activity.length ? activity.map(function(a){
     return '<div class="activity-item"><div><div class="a-title">' + esc(a.title) + '</div><div class="a-sub">' + esc(a.sub) + ' · ' + hijriShort(a.date) + '</div></div>' +
-      '<div class="a-amt" style="color:' + (a.kind==="in"?"var(--success)":"var(--critical)") + '">' + (a.kind==="in"?"+":"−") + fmtMoney(Math.abs(a.amt), state.settings.currency) + '</div></div>';
+      '<div class="a-amt" style="color:' + (a.kind==="in"?"var(--success)":"var(--critical)") + '">' + (a.kind==="in"?"+":"−") + fmtMoneyHtml(Math.abs(a.amt), state.settings.currency) + '</div></div>';
   }).join("") : '<div class="hint">لا توجد حركات مسجلة بعد.</div>';
 
   return '<div class="stat-grid">' +
-    statCard("رصيد الصندوق", fmtMoney(ov.balance, state.settings.currency), "", "wallet", "t-green") +
-    statCard("تحصيل عام " + year + "هـ", fmtMoney(ov.totalCollectedYear, state.settings.currency), "", "up", "t-blue") +
-    statCard("مصروفات عام " + year + "هـ", fmtMoney(ov.totalSpentYear, state.settings.currency), "crit", "down", "t-red") +
+    statCard("رصيد الصندوق", {html: fmtMoneyHtml(ov.balance, state.settings.currency)}, "", "wallet", "t-green") +
+    statCard("تحصيل عام " + year + "هـ", {html: fmtMoneyHtml(ov.totalCollectedYear, state.settings.currency)}, "", "up", "t-blue") +
+    statCard("مصروفات عام " + year + "هـ", {html: fmtMoneyHtml(ov.totalSpentYear, state.settings.currency)}, "crit", "down", "t-red") +
     statCard("سداد كامل", ov.fullyPaid + " من " + ov.memberCount, "accent", "check", "t-amber") +
     '</div>' +
     renderBI(state);
@@ -1160,7 +1231,7 @@ function renderLateTab(state, ui){
     '</div>';
 }
 function statCard(label, value, cls, ic, tone, sub){
-  return '<div class="stat-card ' + (cls||"") + '">' + (ic ? '<div class="kpi-top"><div class="stat-label">' + esc(label) + '</div><div class="kpi-ic ' + (tone||"t-green") + '">' + icon(ic) + '</div></div>' : '<div class="stat-label">' + esc(label) + '</div>') + '<div class="stat-value">' + esc(value) + '</div>' + (sub ? '<div class="stat-sub">' + esc(sub) + '</div>' : '') + '</div>';
+  return '<div class="stat-card ' + (cls||"") + '">' + (ic ? '<div class="kpi-top"><div class="stat-label">' + esc(label) + '</div><div class="kpi-ic ' + (tone||"t-green") + '">' + icon(ic) + '</div></div>' : '<div class="stat-label">' + esc(label) + '</div>') + '<div class="stat-value">' + (value && value.html != null ? value.html : esc(value)) + '</div>' + (sub ? '<div class="stat-sub">' + esc(sub) + '</div>' : '') + '</div>';
 }
 
 /* ---------- members tab ---------- */
@@ -1171,6 +1242,12 @@ function renderMembersTab(state, ui){
   var q = (ui.search||"").trim().toLowerCase();
   var list = state.members.filter(function(m){ return !q || m.name.toLowerCase().indexOf(q) > -1; });
   list = list.slice().sort(function(a,b){ return (a.seq||0) - (b.seq||0); });
+  var mf = ui.memFilter || "all", stOf = {}, fc = {all:list.length, late:0, ok:0};
+  list.forEach(function(m){ var st = stOf[m.id] = memberStatus(state, m.id); fc[st.count ? "late" : "ok"]++; });
+  if(mf !== "all") list = list.filter(function(m){ return mf === "late" ? stOf[m.id].count > 0 : !stOf[m.id].count; });
+  var filterHtml = '<div class="mem-filter" role="group" aria-label="تصفية الأعضاء">' + [["all","الكل"],["late","عليهم متأخرات"],["ok","ما عليهم شي"]].map(function(f){
+    return '<button type="button" class="fam-chip' + (mf === f[0] ? ' on' : '') + '" data-action="mem-filter" data-f="' + f[0] + '">' + f[1] + ' <small>' + fc[f[0]] + '</small></button>';
+  }).join("") + '</div>';
   var totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
   var page = Math.min(ui.page||1, totalPages);
   var pageList = list.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
@@ -1186,16 +1263,16 @@ function renderMembersTab(state, ui){
       var pd = campaignPaid(state, m.id, c.id), cw = ui.canWrite !== false;
       var cls = pd >= c.amount ? "paid" : (pd > 0 ? "partial" : "unpaid");
       var txt = pd >= c.amount ? "مسدد" : (pd > 0 ? "جزئي" : "لم يسدد");
-      return '<td><button class="status-btn ' + cls + '" data-action="open-campaign-pay" data-member="' + m.id + '" data-target="c:' + c.id + '" ' + (cw?"":"disabled") + '>' + txt + (pd >= c.amount ? '<small>' + fmtMoney(pd) + '</small>' : (pd > 0 ? '<small>' + fmtMoney(pd) + ' من ' + fmtMoney(c.amount) + '</small>' : '')) + '</button></td>';
+      return '<td data-label="' + esc(c.name) + '"><button class="status-btn ' + cls + '" data-action="open-campaign-pay" data-member="' + m.id + '" data-target="c:' + c.id + '" ' + (cw?"":"disabled") + '>' + txt + (pd >= c.amount ? '<small>' + fmtMoney(pd) + '</small>' : (pd > 0 ? '<small>' + fmtMoney(pd) + ' من ' + fmtMoney(c.amount) + '</small>' : '')) + '</button></td>';
     }).join("");
     return '<tr>' +
-      '<td class="hint">' + (m.seq!=null ? m.seq : "—") + '</td>' +
-      '<td class="name-cell">' + esc(m.name) + (m.isDemo?'<span class="demo-tag">تجريبي</span>':"") + '</td>' +
-      '<td>' + statusBtn(m.id, 1, info.inst1, 0, ui, info.paid1) + '</td>' +
-      '<td>' + statusBtn(m.id, 2, info.inst2, 0, ui, info.paid2) + '</td>' +
+      '<td class="hint seq-cell">' + (m.seq!=null ? m.seq : "—") + '</td>' +
+      '<td class="name-cell">' + esc(m.name) + (m.isDemo?'<span class="demo-tag">تجريبي</span>':"") + (stOf[m.id] && stOf[m.id].count ? '<span class="late-tag" title="' + esc(stOf[m.id].late.map(lateText).join("، ")) + '">متأخر ' + stOf[m.id].count + '</span>' : '') + '</td>' +
+      '<td data-label="' + esc(periodName(state, year, 1)) + '">' + statusBtn(m.id, 1, info.inst1, 0, ui, info.paid1) + '</td>' +
+      '<td data-label="' + esc(periodName(state, year, 2)) + '">' + statusBtn(m.id, 2, info.inst2, 0, ui, info.paid2) + '</td>' +
       campCells +
       (hasExtra ? '<td style="font-variant-numeric:tabular-nums">' + (info.extra ? fmtMoney(info.extra, state.settings.currency) : "—") + '</td>' : '') +
-      '<td style="font-weight:700;font-variant-numeric:tabular-nums">' + fmtMoney(info.total, state.settings.currency) + '</td>' +
+      '<td class="total-cell" data-label="الإجمالي" style="font-weight:700">' + fmtMoneyHtml(info.total, state.settings.currency) + '</td>' +
       '</tr>';
   }).join("");
 
@@ -1204,8 +1281,8 @@ function renderMembersTab(state, ui){
     '<div class="row-tools">' +
       '<div class="year-nav"><label class="hint">السنة</label><select class="select" data-action="change-year">' + yearOpts + '</select></div>' +
       '<input class="input search-input" placeholder="بحث عن عضو…" data-action="search" value="' + esc(ui.search||"") + '">' +
-    '</div>' +
-    '<div class="table-wrap"><table><thead><tr><th>#</th><th>العضو</th><th>' + esc(periodName(state, year, 1)) + '</th><th>' + esc(periodName(state, year, 2)) + '</th>' + yCamps.map(function(c){ return '<th>' + esc(c.name) + '</th>'; }).join("") + (hasExtra ? '<th>دعم تطوعي (قديم)</th>' : '') + '<th>الإجمالي</th></tr></thead>' +
+    '</div>' + filterHtml +
+    '<div class="table-wrap"><table class="mem-table"><thead><tr><th>#</th><th>العضو</th><th>' + esc(periodName(state, year, 1)) + '</th><th>' + esc(periodName(state, year, 2)) + '</th>' + yCamps.map(function(c){ return '<th>' + esc(c.name) + '</th>'; }).join("") + (hasExtra ? '<th>دعم تطوعي (قديم)</th>' : '') + '<th>الإجمالي</th></tr></thead>' +
     '<tbody>' + (rows || '<tr><td colspan="' + (6 + yCamps.length) + '" class="hint">لا يوجد أعضاء مطابقون.</td></tr>') + '</tbody></table></div>' +
     '<div class="pager">' +
       '<button class="btn btn-ghost btn-sm" data-action="page-prev" ' + (page<=1?"disabled":"") + '>السابق</button>' +
@@ -2273,8 +2350,10 @@ function onClick(e){
   if(action === "confirm-yes"){ var ct = CONFIRM_T; CONFIRM_T = null; UI.modal = null; render(); if(ct){ CONFIRM_OK = true; onClick({target:ct}); CONFIRM_OK = false; } return; }
   if(action === "late-fam-open"){ var lk = t.getAttribute("data-fam"); UI.lateOpen = UI.lateOpen || {}; UI.lateOpen[lk] = !UI.lateOpen[lk]; render(); return; }
   if(action === "late-type"){ UI.lateType = t.getAttribute("data-type"); render(); return; }
+  if(action === "toggle-more"){ UI.moreOpen = !UI.moreOpen; render(); return; }
+  if(action === "mem-filter"){ UI.memFilter = t.getAttribute("data-f"); UI.page = 1; render(); return; }
   if(action === "late-fam-all"){ var lfs = lateFamilies(STATE, UI.lateType), lo = UI.lateOpen = UI.lateOpen || {}; var allO = lfs.every(function(g){ return lo[g.id || "_none"]; }); lfs.forEach(function(g){ lo[g.id || "_none"] = !allO; }); render(); return; }
-  if(action === "toggle-theme"){ var nt = currentTheme() === "dark" ? "light" : "dark"; applyTheme(nt); try{ localStorage.setItem("fund-theme", nt); }catch(e){} render(); return; }
+  if(action === "toggle-theme"){ var nt = currentTheme() === "dark" ? "light" : "dark"; applyTheme(nt); try{ localStorage.setItem("fund-theme", nt); }catch(e){} UI.moreOpen = false; render(); return; }
   if(action === "fam-open"){ if(e.target.closest("button")) return; var fo = t.getAttribute("data-fam"); UI.famOpen = UI.famOpen || {}; UI.famOpen[fo] = !UI.famOpen[fo]; render(); return; }
   if(action === "fam-new"){ famDraftGet(STATE); UI.modal = {type:"famName", famId:null}; render(); var fi0 = document.getElementById("fam-name-in"); if(fi0){ fi0.focus(); } return; }
   if(action === "fam-rename"){ famDraftGet(STATE); UI.modal = {type:"famName", famId:t.getAttribute("data-fam")}; render(); return; }
@@ -2300,7 +2379,7 @@ function onClick(e){
     doPublish(function(s){ return famDraftApply(s); });
     UI.famDraft = null; showToast("تم حفظ تعديلات الأسر"); return;
   }
-  if(action === "switch-tab"){ UI.activeTab = t.getAttribute("data-tab"); UI.page=1; render(); }
+  if(action === "switch-tab"){ UI.activeTab = t.getAttribute("data-tab"); UI.page=1; UI.moreOpen = false; render(); window.scrollTo(0, 0); }
   else if(action === "bi-drill"){ UI.modal = {type:"drill", drill:t.getAttribute("data-drill"), side:t.getAttribute("data-side"), q:""}; render(); }
   else if(action === "drill-side"){ UI.modal.side = t.getAttribute("data-side"); UI.modal.q = ""; UI.modal.sel = []; render(); }
   else if(action === "drill-check" || action === "drill-fam-check"){
@@ -2837,7 +2916,10 @@ async function fetchState(){
   return true;
 }
 async function initCloud(){
-  if(typeof supabase === "undefined"){ AUTH = {screen:"error", err:"تعذر تحميل المكتبة. تأكد من الاتصال وحدّث الصفحة."}; render(); return; }
+  /* لو تعطّل المصدر الأول تنحمّل المكتبة من مصدر احتياطي، فننتظرها شوي قبل ما نعرض الخطأ */
+  var t0 = Date.now();
+  while(typeof supabase === "undefined" && Date.now() - t0 < 8000) await new Promise(function(r){ setTimeout(r, 150); });
+  if(typeof supabase === "undefined"){ AUTH = {screen:"error", err:"ما قدرنا نتصل بالخادم. تأكد من الإنترنت وحاول مرة ثانية."}; render(); return; }
   sb = supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:true, autoRefreshToken:true}});
   var sess = (await sb.auth.getSession()).data.session;
   if(sess) await afterLogin(); else await toLogin();
@@ -2883,7 +2965,7 @@ function renderAuth(){
   var head = '<div class="auth-head"><div class="bmark">ز</div><h2>جمعية ال زايد</h2></div>';
   var body;
   if(AUTH.screen === "loading") body = '<div class="auth-loading"><span class="spin"></span>جاري التحميل…</div>';
-  else if(AUTH.screen === "error") body = '<p class="auth-p">' + esc(AUTH.err || "صار خطأ") + '</p><button class="btn btn-primary auth-btn" data-action="auth-reload">تحديث</button>';
+  else if(AUTH.screen === "error") body = '<div class="auth-alert">' + icon("alert") + '<p>' + esc(AUTH.err || "صار خطأ") + '</p></div><button class="btn btn-primary auth-btn" data-action="auth-reload">حاول مرة ثانية</button>';
   else if(AUTH.screen === "inactive") body = '<p class="auth-p">حسابك موقوف أو لسه ما تفعّل. تواصل مع أمين الصندوق.</p><button class="btn btn-outline auth-btn" data-action="logout">تسجيل خروج</button>';
   else if(AUTH.screen === "import") body = '<p class="auth-p">آخر خطوة: ارفع ملف بيانات الجمعية (بيانات-الجمعية.json) اللي أرسله لك فهد. تنرفع مرة وحدة بس.</p>' +
     '<label class="btn btn-primary auth-btn" style="cursor:pointer">' + (AUTH.busy ? 'جاري الرفع…' : 'اختيار الملف') + '<input type="file" accept=".json,application/json" data-action="import-file" style="display:none"></label>' +
@@ -2902,7 +2984,7 @@ function renderAuth(){
     '<label>كلمة المرور<input class="input ltr" type="password" name="password" autocomplete="current-password" required></label>' +
     '<div class="auth-err">' + esc(AUTH.err || "") + '</div>' +
     '<button class="btn btn-primary auth-btn" type="submit"' + (AUTH.busy ? ' disabled' : '') + '>' + (AUTH.busy ? 'جاري الدخول…' : 'دخول') + '</button></form>';
-  return '<div class="auth-wrap"><div class="auth-card">' + head + body + '</div>' +
+  return '<div class="auth-wrap"><div class="auth-card">' + head + body + '<div class="auth-ver">v' + APP_VERSION + '</div></div>' +
     '<button type="button" class="auth-theme" data-action="toggle-theme">' + icon(dark ? "sun" : "moon") + '</button></div>';
 }
 async function onAuthSubmit(e){
