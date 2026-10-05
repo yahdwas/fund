@@ -384,8 +384,19 @@ tbody tr:hover{background:var(--surface-2)}
 .spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--primary);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .auth-theme{position:absolute;top:16px;left:16px;width:40px;height:40px;border-radius:11px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer}
-.user-form{display:grid;grid-template-columns:1.2fr 1.4fr 1.2fr .9fr auto;gap:8px;margin:6px 0 14px}
-@media (max-width:860px){.user-form{grid-template-columns:1fr 1fr}.user-form .btn{grid-column:1/-1}}
+.sync{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 12px;border-radius:999px;font:600 12px var(--font-display);background:var(--surface-2);color:var(--text-2);border:1px solid var(--border);white-space:nowrap}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--success);flex:0 0 auto;box-shadow:0 0 0 3px color-mix(in srgb,var(--success) 20%,transparent)}
+.sync.saving i{background:var(--warning);animation:syncp 1s ease infinite}
+.sync.offline i{background:var(--text-muted);box-shadow:none}
+.sync.error{color:var(--critical);border-color:var(--critical)}
+.sync.error i{background:var(--critical)}
+@keyframes syncp{50%{opacity:.25}}
+@media (max-width:620px){.sync span{display:none}.sync{padding:0 11px}}
+.user-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;margin:6px 0 14px}
+.user-form>*{min-width:0;width:100%;box-sizing:border-box}
+.user-form .btn{width:auto}
+@media (max-width:1100px){.user-form{grid-template-columns:repeat(2,minmax(0,1fr))}.user-form .btn{grid-column:1/-1;width:100%}}
+@media (max-width:520px){.user-form{grid-template-columns:1fr}}
 .late-sel{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:13px;font-weight:600;color:var(--text-muted)}
 .late-sel .select{flex:1;max-width:420px;cursor:pointer}
 .drill-modal{max-width:640px}
@@ -733,6 +744,7 @@ function renderTopbar(state, ui){
     '<div class="top-sub"><label class="year-pill">السنة <select data-action="change-year">' + enabledYears(state).slice().reverse().map(function(y){ return '<option value="' + y + '"' + (y === viewYear(state) ? ' selected' : '') + '>' + y + 'هـ</option>'; }).join("") + '</select></label><span>آخر تحديث: ' + fmtDateTime(state.meta.updatedAt) + '</span>' + badge + '</div></div>' +
     '<div class="top-actions">' +
     '<button type="button" class="icon-btn" data-action="toggle-theme" title="' + (currentTheme() === "dark" ? 'الوضع الفاتح' : 'الوضع الليلي') + '" aria-label="تبديل الوضع">' + icon(currentTheme() === "dark" ? "sun" : "moon") + '</button>' +
+    syncChip() +
     '<button type="button" class="icon-btn" data-action="logout" title="تسجيل خروج" aria-label="تسجيل خروج">' + icon("logout") + '</button>' +
     (ui.canWrite === false ? "" : '<button class="quickpay-btn" data-action="open-quickpay">' + icon("plus") + 'تسجيل دفعة</button>') +
     '</div></header>';
@@ -2091,7 +2103,9 @@ function showToast(msg){
 
 function cloneState(){ return JSON.parse(JSON.stringify(STATE)); }
 
-var SAVING = false;
+var SAVING = false, SYNC = "ok";
+function setSync(v){ SYNC = v; var el = document.getElementById("sync-chip"); if(el) el.outerHTML = syncChip(); }
+function syncChip(){ var t = {ok:"محفوظ", saving:"جاري الحفظ…", error:"تعذر الحفظ", offline:"غير متصل"}[SYNC] || "محفوظ"; return '<span id="sync-chip" class="sync ' + SYNC + '" title="' + t + '"><i></i><span>' + t + '</span></span>'; }
 async function doPublish(mutate, retried){
   if(!sb || !ME || ME.role !== "admin"){ showToast("حسابك للعرض فقط."); return; }
   var prev = STATE;
@@ -2099,22 +2113,23 @@ async function doPublish(mutate, retried){
   next.meta.updatedAt = new Date().toISOString();
   STATE = next;
   render();
-  SAVING = true;
+  SAVING = true; setSync("saving");
   try{
     var res = await sb.rpc("save_state", {p_data: next, p_version: VERSION});
     if(res.error) throw res.error;
-    VERSION = Number(res.data);
+    VERSION = Number(res.data); SYNC = "ok";
   }catch(err){
     var msg = String((err && (err.message || err.code)) || "");
     if(/conflict/.test(msg) && !retried){
       var fresh = await fetchState();
-      if(fresh){ SAVING = false; return doPublish(mutate, true); }
+      if(fresh){ return await doPublish(mutate, true); }
     }
+    SYNC = navigator.onLine === false ? "offline" : "error";
     STATE = prev; render();
     if(/not_admin/.test(msg)){ UI.canWrite = false; showToast("حسابك للعرض فقط."); }
     else if(/conflict/.test(msg)){ showToast("انحفظ تعديل من جهاز ثاني، حدّثت الصفحة. أعد العملية."); }
     else showToast("تعذر الحفظ. تأكد من الاتصال وحاول مرة ثانية.");
-  }finally{ SAVING = false; }
+  }finally{ SAVING = false; setSync(SYNC); }
 }
 
 function buildFullDocument(state){
@@ -2770,8 +2785,10 @@ async function afterLogin(){
   RT = sb.channel("fund").on("postgres_changes", {event:"UPDATE", schema:"public", table:"fund_state"}, function(p){
     var nv = p && p.new; if(!nv || SAVING) return;
     if(Number(nv.version) > VERSION){ if(nv.data){ STATE = nv.data; VERSION = Number(nv.version); render(); } else { fetchState().then(render); } }
-  }).subscribe();
+  }).subscribe(function(status){ if(status === "SUBSCRIBED"){ if(SYNC === "offline") setSync("ok"); } else if(status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED"){ if(!SAVING) setSync("offline"); } });
 }
+window.addEventListener("offline", function(){ setSync("offline"); });
+window.addEventListener("online", function(){ if(sb && AUTH.screen === "app"){ fetchState().then(function(ok){ setSync(ok ? "ok" : "offline"); render(); }); } });
 document.addEventListener("visibilitychange", function(){
   if(document.visibilityState === "visible" && sb && ME && AUTH.screen === "app" && !SAVING){
     var v0 = VERSION; fetchState().then(function(ok){ if(ok && VERSION !== v0) render(); });
