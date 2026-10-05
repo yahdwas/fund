@@ -547,6 +547,10 @@ tbody tr:hover{background:var(--surface-2)}
 .auth-alert .ic{width:26px;height:26px}
 .auth-alert p{margin:0;font-size:13.5px;font-weight:600;color:var(--text)}
 .mem-filter{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.form-grid>*{min-width:0}
+.row-tools .input{min-width:0}
+@media (max-width:620px){.row-tools{flex-wrap:wrap}.row-tools>.input{flex:1 1 100%!important}}
+.field .input,.field select,.field textarea{min-width:0;max-width:100%}
 .late-tag{display:inline-block;font-size:10.5px;font-weight:700;color:var(--critical);background:var(--critical-soft);border-radius:99px;padding:1px 8px;margin-inline-start:8px;vertical-align:middle;white-space:nowrap}
 .nav-btn .ns,.nav-more,.more-sheet,.more-back{display:none}
 @media (max-width:760px){
@@ -590,7 +594,7 @@ tbody tr:hover{background:var(--surface-2)}
 <script id="app-logic">
 "use strict";
 /* رقم نسخة الموقع: يظهر أسفل القائمة وفي شاشة الدخول. زِده مع كل تحديث */
-var APP_VERSION = "1.0.0";
+var APP_VERSION = "1.0.1";
 
 /* ---------- helpers ---------- */
 function uid(prefix){ return (prefix||"id") + "_" + Math.random().toString(36).slice(2,9); }
@@ -1230,8 +1234,15 @@ function renderLateTab(state, ui){
       (n ? '<div class="lf-list">' + renderLateFamilies(state, ui, 0, true, lt) + '</div>' : '<div class="readonly-note">ما فيه أحد متأخر' + (lt !== "all" ? ' في ' + lateTypeLabel(lt) : '') + ' 👍</div>') +
     '</div>';
 }
+/* قيمة البطاقة: لو كانت مبلغاً (رقم + العملة) نعرض العملة أصغر */
+function statValueHtml(value){
+  if(value && value.html != null) return value.html;
+  var cur = STATE && STATE.settings && STATE.settings.currency, v = String(value);
+  if(cur && v.slice(-(cur.length + 1)) === "\u00A0" + cur) return '<span class="money"><span class="m-num">' + esc(v.slice(0, -(cur.length + 1))) + '</span><span class="m-cur">' + esc(cur) + '</span></span>';
+  return esc(v);
+}
 function statCard(label, value, cls, ic, tone, sub){
-  return '<div class="stat-card ' + (cls||"") + '">' + (ic ? '<div class="kpi-top"><div class="stat-label">' + esc(label) + '</div><div class="kpi-ic ' + (tone||"t-green") + '">' + icon(ic) + '</div></div>' : '<div class="stat-label">' + esc(label) + '</div>') + '<div class="stat-value">' + (value && value.html != null ? value.html : esc(value)) + '</div>' + (sub ? '<div class="stat-sub">' + esc(sub) + '</div>' : '') + '</div>';
+  return '<div class="stat-card ' + (cls||"") + '">' + (ic ? '<div class="kpi-top"><div class="stat-label">' + esc(label) + '</div><div class="kpi-ic ' + (tone||"t-green") + '">' + icon(ic) + '</div></div>' : '<div class="stat-label">' + esc(label) + '</div>') + '<div class="stat-value">' + statValueHtml(value) + '</div>' + (sub ? '<div class="stat-sub">' + esc(sub) + '</div>' : '') + '</div>';
 }
 
 /* ---------- members tab ---------- */
