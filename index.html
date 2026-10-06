@@ -712,6 +712,12 @@ body.rz-active{cursor:col-resize;user-select:none}
 .hscroll-top{overflow-x:auto;overflow-y:hidden;height:14px;margin-bottom:4px}
 .hscroll-top>div{height:1px}
 @media (max-width:760px){.rz-table .stk-0,.rz-table .stk-1,.rz-table td.seq-cell,.rz-table td.name-cell{position:static;box-shadow:none}.hscroll-top,.col-rs,.rz-table colgroup{display:none}.rz-table{width:auto!important;table-layout:auto}.rz-table td{overflow:visible}}
+
+/* ===== v1.0.9: حالات أصغر ===== */
+.status-btn{border:0!important;border-radius:8px;padding:3px 10px;font-size:12px;line-height:1.35;box-shadow:none}
+.status-btn small{font-size:10px;font-weight:500;opacity:.8}
+.status-btn.none{background:transparent;color:var(--text-muted);font-weight:500}
+.status-btn:not(:disabled):hover{filter:brightness(.96)}
 </style>
 </head>
 <body>
@@ -720,6 +726,7 @@ body.rz-active{cursor:col-resize;user-select:none}
 "use strict";
 /* سجل التحديثات: أضف النسخة الجديدة فوق، ورقم النسخة يتحدّث منها تلقائياً */
 var CHANGELOG = [
+  {v:"1.0.9", d:"2026-10-06", items:["جدول الأعضاء: الدفعة اللي ما حل وقتها (مثل رجب قبل وقته) تطلع «لم يحن» بدل «لم يسدد»", "أشكال الحالة (مسدد / لم يسدد) صارت أصغر وبدون إطار، وتاريخ السداد يطلع لما توقف عليها"]},
   {v:"1.0.8", d:"2026-10-06", items:["جدول الأعضاء والدفعات: تقدر توسّع وتضيّق أي عمود بالسحب من طرفه (مثل إكسل)، ودبل كليك يرجعه، والعرض ينحفظ على جهازك", "شريط التمرير يمين ويسار صار فوق الجدول وتحته", "عمود الرقم والاسم ثابتين وأنت تمرر", "الجدول يحفظ مكان التمرير لما تسجل دفعة وترجع"]},
   {v:"1.0.7", d:"2026-10-06", items:["تقرير الإيرادات: عمود «دفعوا» (كم عضو من الكل) بدل عدد الدفعات، وانشال سجل الإيرادات بالتفصيل", "الضغط على اسم البند في تقرير الإيرادات يعرض اللي ما دفعوا وتسجل لهم من نفس النافذة", "PDF الإيرادات: الجدول بس", "تقرير المقبرة: الأسماء بس في 3 أعمدة مرتبة بالتسلسل، وفي آخر كل تقرير «انتهى التقرير»"]},
   {v:"1.0.6", d:"2026-10-06", items:["جدول الأعضاء: عمود لكل بند في السنة (الدفعات، الدعم، البنود الخاصة، الدعم الفردي، القبر)", "تسجيل الدفعة: كل خيارات الدعم صارت تحت «الدعم»", "الإدارة: قسم «الدعم الفردي» لدعم اختياري ما ينحسب على الباقين"]},
@@ -1512,8 +1519,8 @@ function renderMembersTab(state, ui){
     return '<tr>' +
       '<td class="hint seq-cell">' + (m.seq!=null ? m.seq : "—") + '</td>' +
       '<td class="name-cell"><button type="button" class="mem-link" data-action="open-member" data-id="' + m.id + '"><span class="av">' + esc(String(m.name || "؟").trim().charAt(0)) + '</span>' + esc(m.name) + '</button>' + (m.isDemo?'<span class="demo-tag">تجريبي</span>':"") + (stOf[m.id] && stOf[m.id].count ? '<span class="late-tag" title="' + esc(stOf[m.id].late.map(lateText).join("، ")) + '">متأخر ' + stOf[m.id].count + '</span>' : '') + '</td>' +
-      '<td data-label="' + esc(periodName(state, year, 1)) + '">' + statusBtn(m.id, 1, info.inst1, 0, ui, info.paid1) + '</td>' +
-      '<td data-label="' + esc(periodName(state, year, 2)) + '">' + statusBtn(m.id, 2, info.inst2, 0, ui, info.paid2) + '</td>' +
+      '<td data-label="' + esc(periodName(state, year, 1)) + '">' + statusBtn(m.id, 1, info.inst1, 0, ui, info.paid1, cmpPeriod({year:year, inst:1}, currentDuePeriod()) > 0) + '</td>' +
+      '<td data-label="' + esc(periodName(state, year, 2)) + '">' + statusBtn(m.id, 2, info.inst2, 0, ui, info.paid2, cmpPeriod({year:year, inst:2}, currentDuePeriod()) > 0) + '</td>' +
       campCells + fundCells + graveCells +
       (hasExtra ? '<td style="font-variant-numeric:tabular-nums">' + (info.extra ? fmtMoney(info.extra, state.settings.currency) : "—") + '</td>' : '') +
       '<td class="total-cell" data-label="الإجمالي" style="font-weight:700">' + fmtMoneyHtml(info.total, state.settings.currency) + '</td>' +
@@ -1543,14 +1550,16 @@ function renderMembersTab(state, ui){
       '<button class="btn btn-ghost btn-sm" data-action="page-next" ' + (page>=totalPages?"disabled":"") + '>التالي</button>' +
     '</div></div>';
 }
-function statusBtn(memberId, inst, payment, due, ui, paidSum){
+function statusBtn(memberId, inst, payment, due, ui, paidSum, future){
   var canWrite = ui.canWrite !== false;
   if(payment && paidSum != null && paidSum < due){
     return '<button class="status-btn partial" data-action="open-payment" data-member="' + memberId + '" data-inst="' + inst + '" ' + (canWrite?"":"disabled") + '>جزئي<small>' + fmtMoney(paidSum) + ' من ' + fmtMoney(due) + '</small></button>';
   }
   if(payment){
-    return '<button class="status-btn paid" data-action="open-payment" data-member="' + memberId + '" data-inst="' + inst + '" ' + (canWrite?"":"disabled") + '>مسدد<small>' + fmtMoney(payment.amount) + ' · ' + hijriShort(payment.date) + '</small></button>';
+    return '<button class="status-btn paid" title="' + esc("سدد " + fmtMoney(payment.amount) + " بتاريخ " + hijriShort(payment.date)) + '" data-action="open-payment" data-member="' + memberId + '" data-inst="' + inst + '" ' + (canWrite?"":"disabled") + '>مسدد<small>' + fmtMoney(payment.amount) + '</small></button>';
   }
+  /* الدفعة اللي ما حل وقتها: ما تنحسب تأخير (تقدر تسجلها مقدم) */
+  if(future) return '<button class="status-btn none" title="ما حل وقتها للحين" data-action="open-payment" data-member="' + memberId + '" data-inst="' + inst + '" ' + (canWrite?"":"disabled") + '>لم يحن</button>';
   return '<button class="status-btn unpaid" data-action="open-payment" data-member="' + memberId + '" data-inst="' + inst + '" ' + (canWrite?"":"disabled") + '>لم يسدد</button>';
 }
 
