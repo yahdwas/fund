@@ -678,6 +678,10 @@ button.more-ver{background:none;border:0;cursor:pointer;font-family:inherit}
  .auth-brand li .ic{width:20px;height:20px;padding:8px;box-sizing:content-box;border-radius:11px;background:rgba(255,255,255,.07);color:var(--mark-a,#1FAE8E)}
 }
 @media (max-width:620px){.mm-stats b{font-size:14px}.member-modal{padding:18px}}
+
+/* ===== v1.0.6 ===== */
+.status-btn.none{color:var(--text-muted);background:var(--surface-2);border-color:var(--border)}
+.status-btn:disabled{cursor:default}
 </style>
 </head>
 <body>
@@ -686,6 +690,7 @@ button.more-ver{background:none;border:0;cursor:pointer;font-family:inherit}
 "use strict";
 /* سجل التحديثات: أضف النسخة الجديدة فوق، ورقم النسخة يتحدّث منها تلقائياً */
 var CHANGELOG = [
+  {v:"1.0.6", d:"2026-10-06", items:["جدول الأعضاء: عمود لكل بند في السنة (الدفعات، الدعم، البنود الخاصة، الدعم الفردي، القبر)", "تسجيل الدفعة: كل خيارات الدعم صارت تحت «الدعم»", "الإدارة: قسم «الدعم الفردي» لدعم اختياري ما ينحسب على الباقين"]},
   {v:"1.0.5", d:"2026-10-06", items:["تسجيل الدفعة: تقدر تكتب أي مبلغ للقبر والبنود الخاصة بدون ما تنحصر في أرقام محددة", "أزرار 25 و50 صارت ضمن المبالغ السريعة"]},
   {v:"1.0.4", d:"2026-10-06", items:["صفحة لكل عضو: اضغط على اسمه وتشوف دفعاته ومتأخراته ومساهماته", "شاشة دخول جديدة", "سجل التحديثات: اضغط على رقم النسخة"]},
   {v:"1.0.3", d:"2026-10-06", items:["لوحة نظرة عامة جديدة فيها رسم الدخل والمصروفات لكل شهر", "آخر الحركات في الصفحة الرئيسية", "دائرة بأول حرف جنب اسم كل عضو"]},
@@ -784,7 +789,7 @@ function lateMatch(l, t){ t = normLateType(t); if(t === "all") return true; if(t
 function lateFundOptions(state){
   var vy = viewYear(state), out = [];
   (state.campaigns||[]).filter(function(c){ return !c.closed && inYear(c.date, vy); }).forEach(function(c){ out.push(["c:" + c.id, c.name, c.date]); });
-  (state.funds||[]).filter(function(f){ return f.open !== false && inYear(f.date, vy); }).forEach(function(f){ out.push(["f:" + f.id, f.name, f.date]); });
+  (state.funds||[]).filter(function(f){ return f.open !== false && !f.voluntary && inYear(f.date, vy); }).forEach(function(f){ out.push(["f:" + f.id, f.name, f.date]); });
   return out.sort(function(a,b){ return (b[2]||"").localeCompare(a[2]||""); });
 }
 function yearDuePeriods(y){
@@ -867,7 +872,7 @@ function dueItems(state, memberId, withFuture){
     items.push({kind:"campaign", campaignId:c.id, year:h.year, inst:0, label:c.name, sort:(h.year||0)*12 + ((h.month||1)-1) + 0.5,
       due:c.amount, paid:cp, open: cp < c.amount, future:false});
   });
-  (state.funds||[]).filter(function(f){ return f.open !== false && inYear(f.date, vy); }).forEach(function(f){
+  (state.funds||[]).filter(function(f){ return f.open !== false && !f.voluntary && inYear(f.date, vy); }).forEach(function(f){
     var h = hijriParts(f.date), fp = fundPaid(state, memberId, f.id);
     items.push({kind:"fund", fundId:f.id, year:h.year, inst:0, label:f.name, sort:(h.year||0)*12 + ((h.month||1)-1) + 0.6, due:(f.amount > 0 ? f.amount : null), paid:fp, open: fp <= 0, future:false});
   });
@@ -1195,13 +1200,18 @@ function renderBI(state){
     var got = contribs.reduce(function(s,g){ return s+g.amount; }, 0);
     return biRow(c.name, paid, n - paid, "المجموع " + fmtMoney(got), "ساهموا", "ما ساهموا", "g:" + c.id);
   }).join("");
-  var fundRows = (state.funds||[]).filter(function(f){ return inYear(f.date, vy); }).sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).map(function(f){
+  var fundRows = (state.funds||[]).filter(function(f){ return !f.voluntary && inYear(f.date, vy); }).sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).map(function(f){
     var paid = members.filter(function(m){ return fundPaid(state, m.id, f.id) > 0; }).length;
     var got = state.payments.filter(function(x){ return x.fundId === f.id; }).reduce(function(s,x){ return s+x.amount; }, 0);
     return biRow(f.name + (f.open ? "" : " (مقفل)"), paid, n - paid, "المجموع " + fmtMoney(got), "ساهموا", "ما ساهموا", "f:" + f.id);
   }).join("");
   var dons = state.payments.filter(function(x){ return x.type === "تبرع" && inYear(x.date, vy); });
   var donSummary = dons.length ? '<div class="bi-row"><div class="bi-row-head"><span class="bi-label">التبرعات الفردية</span><span class="bi-nums"><b>' + fmtMoney(dons.reduce(function(a,x){ return a + x.amount; }, 0)) + '</b> من ' + Object.keys(dons.reduce(function(o,x){ o[x.memberId] = 1; return o; }, {})).length + ' متبرع</span></div></div>' : '<div class="bi-row"><div class="bi-row-head"><span class="bi-label">التبرعات الفردية</span><span class="bi-nums">ما فيه تبرعات للحين</span></div></div>';
+  var volRows = (state.funds||[]).filter(function(f){ return f.voluntary && inYear(f.date, vy); }).map(function(f){
+    var fps = state.payments.filter(function(x){ return x.fundId === f.id; });
+    var who = Object.keys(fps.reduce(function(o,x){ o[x.memberId] = 1; return o; }, {})).length;
+    return '<div class="bi-row"><div class="bi-row-head"><span class="bi-label">' + esc(f.name) + ' <small class="hint">(فردي)</small></span><span class="bi-nums">' + (who ? '<b>' + fmtMoney(fps.reduce(function(a,x){ return a + x.amount; }, 0)) + '</b> من ' + who + ' داعم' : 'ما فيه داعمين للحين') + '</span></div></div>';
+  }).join("");
   var legend = '<div class="bi-legend"><span><i class="bi-key bi-paid"></i>دفعوا / ساهموا</span><span><i class="bi-key bi-late"></i>متأخرين / ما ساهموا</span></div>';
   var BI_IC = {"الدفعات":"wallet","الدعم":"campaign","البنود الخاصة":"fund","القبر":"grave"};
   function block(title, rows, empty){
@@ -1210,7 +1220,7 @@ function renderBI(state){
   return '<div class="card"><div class="row-tools"><h2 style="margin:0">لوحة المؤشرات — ' + vy + 'هـ</h2>' + legend + '</div>' +
     '<div class="bi-grid">' +
       block("الدفعات", subRows, "ما فيه فترات مستحقة.") +
-      block("الدعم", campRows + donSummary, "ما فيه دعم مفعّل للحين.") +
+      block("الدعم", campRows + volRows + donSummary, "ما فيه دعم مفعّل للحين.") +
       (fundRows ? block("البنود الخاصة", fundRows, "") : '') +
       block("القبر", graveRows, "ما فيه حالات مسجلة في القبر.") +
     '</div></div>';
@@ -1230,7 +1240,7 @@ function drillData(state, drill){
   } else if(kind === "f"){
     var fd = (state.funds||[]).find(function(x){ return x.id === key; }); if(!fd) return null;
     out.title = fd.name; out.tipPaid = "ساهموا"; out.tipLate = "ما ساهموا";
-    mem.forEach(function(m){ var fp = fundPaid(state, m.id, fd.id); if(fp > 0) out.paid.push({m:m, note:fmtMoney(fp, cur)}); else out.late.push({m:m, note:""}); });
+    mem.forEach(function(m){ var fp = fundPaid(state, m.id, fd.id); if(fp > 0) out.paid.push({m:m, note:fmtMoney(fp, cur)}); else if(!fd.voluntary) out.late.push({m:m, note:""}); });
   } else {
     var g = (state.graveCases||[]).find(function(x){ return x.id === key; }); if(!g) return null;
     out.title = "القبر: " + g.name; out.tipPaid = "ساهموا"; out.tipLate = "ما ساهموا";
@@ -1405,8 +1415,20 @@ function renderMembersTab(state, ui){
   var hasExtra = false;
   var yCamps = (state.campaigns||[]).filter(function(c){ return hijriParts(c.date).year === year; })
     .sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
+  var yFunds = (state.funds||[]).filter(function(f){ return inYear(f.date, year); }).sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
+  var yGraves = (state.graveCases||[]).filter(function(c){ return inYear(c.date, year); }).sort(function(a,b){ return (a.date||"").localeCompare(b.date||""); });
   var rows = pageList.map(function(m){
-    var info = memberYearInfo(state, m.id, year);
+    var info = memberYearInfo(state, m.id, year), cw0 = ui.canWrite !== false;
+    var fundCells = yFunds.map(function(f){
+      var fp = fundPaid(state, m.id, f.id), can = cw0 && f.open !== false;
+      var cls = fp > 0 ? "paid" : (f.voluntary ? "none" : "unpaid");
+      var txt = fp > 0 ? (f.voluntary ? "دعم" : "مسدد") : (f.voluntary ? "—" : "لم يسدد");
+      return '<td data-label="' + esc(f.name) + '"><button class="status-btn ' + cls + '" data-action="open-campaign-pay" data-member="' + m.id + '" data-target="f:' + f.id + '" ' + (can ? "" : "disabled") + '>' + txt + (fp > 0 ? '<small>' + fmtMoney(fp) + '</small>' : '') + '</button></td>';
+    }).join("");
+    var graveCells = yGraves.map(function(c){
+      var gc = graveContribution(state, m.id, c.id), can = cw0 && !c.closed;
+      return '<td data-label="' + esc("القبر: " + c.name) + '"><button class="status-btn ' + (gc ? "paid" : "unpaid") + '" data-action="open-campaign-pay" data-member="' + m.id + '" data-target="g:' + c.id + '" ' + (can ? "" : "disabled") + '>' + (gc ? 'ساهم<small>' + fmtMoney(gc.amount) + '</small>' : 'ما ساهم') + '</button></td>';
+    }).join("");
     var campCells = yCamps.map(function(c){
       var pd = campaignPaid(state, m.id, c.id), cw = ui.canWrite !== false;
       var cls = pd >= c.amount ? "paid" : (pd > 0 ? "partial" : "unpaid");
@@ -1418,7 +1440,7 @@ function renderMembersTab(state, ui){
       '<td class="name-cell"><button type="button" class="mem-link" data-action="open-member" data-id="' + m.id + '"><span class="av">' + esc(String(m.name || "؟").trim().charAt(0)) + '</span>' + esc(m.name) + '</button>' + (m.isDemo?'<span class="demo-tag">تجريبي</span>':"") + (stOf[m.id] && stOf[m.id].count ? '<span class="late-tag" title="' + esc(stOf[m.id].late.map(lateText).join("، ")) + '">متأخر ' + stOf[m.id].count + '</span>' : '') + '</td>' +
       '<td data-label="' + esc(periodName(state, year, 1)) + '">' + statusBtn(m.id, 1, info.inst1, 0, ui, info.paid1) + '</td>' +
       '<td data-label="' + esc(periodName(state, year, 2)) + '">' + statusBtn(m.id, 2, info.inst2, 0, ui, info.paid2) + '</td>' +
-      campCells +
+      campCells + fundCells + graveCells +
       (hasExtra ? '<td style="font-variant-numeric:tabular-nums">' + (info.extra ? fmtMoney(info.extra, state.settings.currency) : "—") + '</td>' : '') +
       '<td class="total-cell" data-label="الإجمالي" style="font-weight:700">' + fmtMoneyHtml(info.total, state.settings.currency) + '</td>' +
       '</tr>';
@@ -1429,8 +1451,8 @@ function renderMembersTab(state, ui){
     '<div class="row-tools">' +
       '<input class="input search-input" placeholder="بحث عن عضو…" data-action="search" value="' + esc(ui.search||"") + '">' +
     '</div>' + filterHtml +
-    '<div class="table-wrap"><table class="mem-table"><thead><tr><th>#</th><th>العضو</th><th>' + esc(periodName(state, year, 1)) + '</th><th>' + esc(periodName(state, year, 2)) + '</th>' + yCamps.map(function(c){ return '<th>' + esc(c.name) + '</th>'; }).join("") + (hasExtra ? '<th>دعم تطوعي (قديم)</th>' : '') + '<th>الإجمالي</th></tr></thead>' +
-    '<tbody>' + (rows || '<tr><td colspan="' + (6 + yCamps.length) + '" class="hint">لا يوجد أعضاء مطابقون.</td></tr>') + '</tbody></table></div>' +
+    '<div class="table-wrap"><table class="mem-table"><thead><tr><th>#</th><th>العضو</th><th>' + esc(periodName(state, year, 1)) + '</th><th>' + esc(periodName(state, year, 2)) + '</th>' + yCamps.map(function(c){ return '<th>' + esc(c.name) + '</th>'; }).join("") + yFunds.map(function(f){ return '<th>' + esc(f.name) + (f.voluntary ? ' <small class="hint">(فردي)</small>' : '') + '</th>'; }).join("") + yGraves.map(function(c){ return '<th>القبر: ' + esc(c.name) + '</th>'; }).join("") + (hasExtra ? '<th>دعم تطوعي (قديم)</th>' : '') + '<th>الإجمالي</th></tr></thead>' +
+    '<tbody>' + (rows || '<tr><td colspan="' + (6 + yCamps.length + yFunds.length + yGraves.length) + '" class="hint">لا يوجد أعضاء مطابقون.</td></tr>') + '</tbody></table></div>' +
     '<div class="pager">' +
       '<button class="btn btn-ghost btn-sm" data-action="page-prev" ' + (page<=1?"disabled":"") + '>السابق</button>' +
       '<span>صفحة ' + page + ' من ' + totalPages + ' — ' + list.length + ' عضو</span>' +
@@ -1610,13 +1632,28 @@ function renderAdminTabCore(state, ui){
     '<div class="card admin-section"><h3>البنود الخاصة (تحصيل)</h3>' +
     '<div class="hint">بند تحصيل مستقل عن الدفعات والدعم، يدخل رصيد الصندوق. البند المفتوح يطلع في «تسجيل دفعة»، ولما تقفله يختفي منها وتبقى دفعاته في السجل والتقارير.</div>' +
     '<form data-action="add-fund" class="row-tools"><input class="input" name="fname" placeholder="اسم البند… مثال: حالة فلان" style="flex:1" maxlength="80"><button class="btn btn-primary" type="submit">＋ إضافة بند</button></form>' +
-    ((state.funds||[]).length ? '<div class="table-wrap"><table style="min-width:520px"><thead><tr><th>البند</th><th>الحالة</th><th>ساهموا</th><th>المحصّل</th><th></th></tr></thead><tbody>' +
-      (state.funds||[]).slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).map(function(f){
+    ((state.funds||[]).some(function(f){ return !f.voluntary; }) ? '<div class="table-wrap"><table style="min-width:520px"><thead><tr><th>البند</th><th>الحالة</th><th>ساهموا</th><th>المحصّل</th><th></th></tr></thead><tbody>' +
+      (state.funds||[]).filter(function(f){ return !f.voluntary; }).sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).map(function(f){
         var cnt = state.members.filter(function(mm){ return fundPaid(state, mm.id, f.id) > 0; }).length;
         var got = state.payments.filter(function(p){ return p.fundId === f.id; }).reduce(function(x,p){ return x + p.amount; }, 0);
         return '<tr><td class="name-cell">' + esc(f.name) + '<br><span class="hint">' + hijriLabel(f.date) + '</span></td>' +
           '<td>' + (f.open ? '<span class="tag tag-ok">مفتوح</span>' : '<span class="tag tag-crit">مغلق</span>') + '</td>' +
           '<td>' + cnt + ' من ' + state.members.length + '</td><td style="font-weight:700">' + fmtMoney(got) + '</td>' +
+          '<td style="display:flex;gap:6px"><button class="btn btn-outline btn-sm" data-action="fund-toggle" data-id="' + f.id + '">' + (f.open ? 'إغلاق' : 'فتح') + '</button>' +
+          '<button class="btn btn-ghost btn-sm" data-action="fund-delete" data-id="' + f.id + '">حذف</button></td></tr>';
+      }).join("") + '</tbody></table></div>' : '') +
+    '</div>' +
+
+    '<div class="card admin-section"><h3>الدعم الفردي</h3>' +
+    '<div class="hint">دعم اختياري: اللي يبي يدعم يدفع المبلغ اللي يبيه، وما ينحسب على الباقين ولا يطلعون متأخرين. يطلع في «تسجيل دفعة» تحت الدعم.</div>' +
+    '<form data-action="add-vfund" class="row-tools"><input class="input" name="fname" placeholder="مثال: دعم زواج فلان" style="flex:1" maxlength="80"><button class="btn btn-primary" type="submit">＋ إضافة دعم فردي</button></form>' +
+    ((state.funds||[]).some(function(f){ return f.voluntary; }) ? '<div class="table-wrap"><table style="min-width:520px"><thead><tr><th>الدعم</th><th>الحالة</th><th>الداعمين</th><th>المحصّل</th><th></th></tr></thead><tbody>' +
+      (state.funds||[]).filter(function(f){ return f.voluntary; }).sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).map(function(f){
+        var fps = state.payments.filter(function(p){ return p.fundId === f.id; });
+        var who = Object.keys(fps.reduce(function(o,x){ o[x.memberId] = 1; return o; }, {})).length;
+        return '<tr><td class="name-cell">' + esc(f.name) + '<br><span class="hint">' + hijriLabel(f.date) + '</span></td>' +
+          '<td>' + (f.open ? '<span class="tag tag-ok">مفتوح</span>' : '<span class="tag tag-crit">مغلق</span>') + '</td>' +
+          '<td>' + who + '</td><td style="font-weight:700">' + fmtMoney(fps.reduce(function(x,p){ return x + p.amount; }, 0)) + '</td>' +
           '<td style="display:flex;gap:6px"><button class="btn btn-outline btn-sm" data-action="fund-toggle" data-id="' + f.id + '">' + (f.open ? 'إغلاق' : 'فتح') + '</button>' +
           '<button class="btn btn-ghost btn-sm" data-action="fund-delete" data-id="' + f.id + '">حذف</button></td></tr>';
       }).join("") + '</tbody></table></div>' : '') +
@@ -1933,8 +1970,12 @@ function qpTargetRadios(state, target){
   var hasCur = (state.campaigns||[]).some(function(c){ return sameHijriMonth(c.date, qpDate(UI.modal || {})); });
   if(!hasCur) camps.unshift(['newc', '＋ ' + curName + ' (جديد، يتطبق على الكل)']);
   function o(x){ var on = x[0] === target; return '<label class="qp-radio' + (on ? ' on' : '') + '"><input type="radio" name="target" data-action="qp-target" value="' + esc(x[0]) + '"' + (on ? ' checked' : '') + '><span>' + esc(x[1]) + '</span></label>'; }
-  return '<div class="qp-radio-group">الدفعات</div>' + group.map(o).join("") + '<div class="qp-radio-group">الدعم</div>' + camps.map(o).join("") + '<div class="qp-radio-group">التبرع</div>' + o(['don', 'تبرع فردي (مبلغ حر، ما يسوي تأخير لأحد)']) +
-    ((state.funds||[]).some(function(f){ return f.open; }) ? '<div class="qp-radio-group">البنود الخاصة</div>' + (state.funds||[]).filter(function(f){ return f.open; }).map(function(f){ return o(['f:' + f.id, f.name]); }).join("") : '') +
+  var openFunds = (state.funds||[]).filter(function(f){ return f.open; }).sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
+  var support = camps
+    .concat(openFunds.filter(function(f){ return !f.voluntary; }).map(function(f){ return ['f:' + f.id, f.name + (f.amount > 0 ? ' (' + fmtMoney(f.amount) + ')' : '')]; }))
+    .concat(openFunds.filter(function(f){ return f.voluntary; }).map(function(f){ return ['f:' + f.id, f.name + ' — فردي (اختياري)']; }))
+    .concat([['don', 'تبرع حر (مبلغ حر، ما يسوي تأخير لأحد)']]);
+  return '<div class="qp-radio-group">الدفعات</div>' + group.map(o).join("") + '<div class="qp-radio-group">الدعم</div>' + support.map(o).join("") +
     ((state.graveCases||[]).some(function(c){ return !c.closed; }) ? '<div class="qp-radio-group">القبر</div>' + (state.graveCases||[]).filter(function(c){ return !c.closed; }).sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).map(function(c){ return o(['g:' + c.id, 'القبر: ' + c.name + ' (' + hijriShort(c.date) + ')']); }).join("") : '');
 }
 function defaultTarget(){ var c = currentDuePeriod(); return "p:" + periodKey(c.year, c.inst); }
@@ -2088,7 +2129,7 @@ function lateSelOptions(state, kind){
     return ps.reverse().map(function(p){ return ["p:" + periodKey(p.year, p.inst), periodName(state, p.year, p.inst) + (cmpPeriod(p, cur) === 0 ? " (الحالية)" : "")]; }).concat([["all", "كل دفعات سنة " + viewYear(state) + "هـ"]]);
   }
   var items = (state.campaigns||[]).map(function(c){ return {d:c.date||"", o:["c:" + c.id, c.name + " (" + fmtMoney(c.amount) + ")"]}; })
-    .concat((state.funds||[]).map(function(f){ return {d:f.date||"", o:["f:" + f.id, f.name + (f.open ? "" : " (مقفل)")]}; }));
+    .concat((state.funds||[]).filter(function(f){ return !f.voluntary; }).map(function(f){ return {d:f.date||"", o:["f:" + f.id, f.name + (f.open ? "" : " (مقفل)")]}; }));
   items.sort(function(a,b){ return b.d.localeCompare(a.d); });
   return items.map(function(x){ return x.o; }).concat([["all", "كل الدعم والبنود"]]);
 }
@@ -3079,11 +3120,11 @@ function onSubmit(e){
     doPublish(function(s){ s.settings.years = enabledYears(s).concat([ny]).sort(function(a,b){ return a-b; }); return s; });
     showToast("تمت إضافة سنة " + ny + "هـ");
   }
-  else if(action === "add-fund"){
-    var fName = (data.get("fname")||"").trim();
-    if(!fName){ showToast("اكتب اسم البند"); return; }
+  else if(action === "add-fund" || action === "add-vfund"){
+    var fName = (data.get("fname")||"").trim(), fVol = action === "add-vfund";
+    if(!fName){ showToast(fVol ? "اكتب اسم الدعم" : "اكتب اسم البند"); return; }
     if((STATE.funds||[]).some(function(f){ return f.name === fName; })){ showToast("فيه بند بنفس الاسم"); return; }
-    doPublish(function(s){ s.funds = s.funds || []; s.funds.push({id:uid("fnd"), name:fName, date:todayISO(), open:true}); return s; });
+    doPublish(function(s){ s.funds = s.funds || []; var nf = {id:uid("fnd"), name:fName, date:todayISO(), open:true}; if(fVol) nf.voluntary = true; s.funds.push(nf); return s; });
     form.reset();
   }
   else if(action === "add-grave-case"){
