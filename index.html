@@ -603,6 +603,39 @@ h1,h2,h3,.stat-value,.b-name{letter-spacing:0}
 .accent-sw:hover{border-color:var(--border-2)}
 .accent-sw.on{border-color:var(--sw);box-shadow:0 0 0 3px color-mix(in srgb,var(--sw) 22%,transparent)}
 @media (max-width:760px){.greet h2{font-size:20px}.greet{margin-bottom:14px}}
+
+/* ===== v1.0.3: لوحة نظرة عامة ===== */
+.stat-card.hero{background:linear-gradient(140deg,var(--mark-b),color-mix(in srgb,var(--mark-b) 62%,#000));border-color:transparent;color:#fff}
+.stat-card.hero .stat-label,.stat-card.hero .stat-sub{color:rgba(255,255,255,.78)}
+.stat-card.hero .stat-value{color:#fff}
+.stat-card.hero .kpi-ic{background:rgba(255,255,255,.16);color:#fff}
+.stat-card.hero .m-cur{opacity:.75}
+.stat-sub{font-size:12px;color:var(--text-muted);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;margin:16px 0}
+.dash-card{margin:0;display:flex;flex-direction:column}
+.dash-card .chart-wrap{flex:1;display:flex;align-items:flex-end}
+.dc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.dc-head h3{margin:0;font-size:15.5px}
+.dc-head h3 span{font-weight:500;color:var(--text-muted);font-size:13px;margin-inline-start:4px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--text-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.chart-wrap{overflow-x:auto;margin:0 -4px}
+.mchart{width:100%;min-width:520px;height:auto;display:block}
+.mchart .grid{stroke:var(--border);stroke-width:1}
+.mchart .ax{fill:var(--text-muted);font-size:10.5px;font-family:var(--font-body)}
+.mchart .b-inc{fill:var(--c-inc)}
+.mchart .b-exp{fill:var(--c-exp)}
+.mchart .hit{fill:transparent}
+.mchart .col:hover .hit{fill:color-mix(in srgb,var(--text) 5%,transparent)}
+.chart-empty{display:grid;place-items:center;min-height:180px;color:var(--text-muted);font-size:13px;background:var(--surface-2);border-radius:12px}
+.activity-list{flex:1}
+.activity-list .activity-item:last-child{border-bottom:0}
+.link-btn{background:none;border:0;color:var(--primary);font:600 12.5px var(--font-body);cursor:pointer;padding:4px}
+.link-btn:hover{text-decoration:underline}
+.av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--primary-soft);color:var(--primary);font-weight:700;font-size:12.5px;margin-inline-end:10px;vertical-align:middle;flex-shrink:0}
+@media (max-width:1100px){.dash-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.stat-card.hero{grid-column:1/-1}.stat-sub{white-space:normal}}
 </style>
 </head>
 <body>
@@ -610,7 +643,7 @@ h1,h2,h3,.stat-value,.b-name{letter-spacing:0}
 <script id="app-logic">
 "use strict";
 /* رقم نسخة الموقع: يظهر أسفل القائمة وفي شاشة الدخول. زِده مع كل تحديث */
-var APP_VERSION = "1.0.2";
+var APP_VERSION = "1.0.3";
 
 /* ---------- helpers ---------- */
 function uid(prefix){ return (prefix||"id") + "_" + Math.random().toString(36).slice(2,9); }
@@ -1017,18 +1050,26 @@ function renderOverviewTab(state, ui){
     return {date:p.date, title:(m?m.name:"عضو محذوف") + " — " + typeLabel(p.type), sub:(p.type==="دفعة أساسية"?("دفعة "+installmentLabel(p.installment)+" / "+p.year+"هـ"):(p.campaignId?(((state.campaigns||[]).find(function(c){return c.id===p.campaignId;})||{}).name||"دعم"):(p.note||(p.year+"هـ")))), amt:p.amount, kind:"in"};
   }).concat(state.expenses.map(function(e){
     return {date:e.date, title:e.category, sub:e.description||"", amt:-e.amount, kind:"out"};
-  })).sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).slice(0,8);
+  })).sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); }).slice(0,7);
 
   var activityHtml = activity.length ? activity.map(function(a){
     return '<div class="activity-item"><div><div class="a-title">' + esc(a.title) + '</div><div class="a-sub">' + esc(a.sub) + ' · ' + hijriShort(a.date) + '</div></div>' +
       '<div class="a-amt" style="color:' + (a.kind==="in"?"var(--success)":"var(--critical)") + '">' + (a.kind==="in"?"+":"−") + fmtMoneyHtml(Math.abs(a.amt), state.settings.currency) + '</div></div>';
   }).join("") : '<div class="hint">لا توجد حركات مسجلة بعد.</div>';
 
+  var okN = state.members.filter(function(m){ return !memberStatus(state, m.id).count; }).length;
   return renderGreeting() + '<div class="stat-grid">' +
-    statCard("رصيد الصندوق", {html: fmtMoneyHtml(ov.balance, state.settings.currency)}, "", "wallet", "t-green") +
+    statCard("رصيد الصندوق", {html: fmtMoneyHtml(ov.balance, state.settings.currency)}, "hero", "wallet", "t-green", "دخل كلي " + fmtMoney(ov.totalCollectedAll) + " · صرف كلي " + fmtMoney(ov.totalSpentAll)) +
     statCard("تحصيل عام " + year + "هـ", {html: fmtMoneyHtml(ov.totalCollectedYear, state.settings.currency)}, "", "up", "t-blue") +
     statCard("مصروفات عام " + year + "هـ", {html: fmtMoneyHtml(ov.totalSpentYear, state.settings.currency)}, "crit", "down", "t-red") +
-    statCard("سداد كامل", ov.fullyPaid + " من " + ov.memberCount, "accent", "check", "t-amber") +
+    statCard("ما عليهم متأخرات", okN + " من " + ov.memberCount, "accent", "check", "t-amber") +
+    '</div>' +
+    '<div class="dash-grid">' +
+      '<div class="card dash-card"><div class="dc-head"><h3>الدخل والمصروفات <span>' + year + 'هـ</span></h3>' +
+        '<div class="legend"><span><i style="background:var(--c-inc)"></i>الدخل</span><span><i style="background:var(--c-exp)"></i>المصروفات</span></div></div>' +
+        monthlyChart(state, year) + '</div>' +
+      '<div class="card dash-card"><div class="dc-head"><h3>آخر الحركات</h3><button class="link-btn" data-action="switch-tab" data-tab="log">السجل كامل</button></div>' +
+        '<div class="activity-list">' + activityHtml + '</div></div>' +
     '</div>' +
     renderBI(state);
 }
@@ -1038,6 +1079,32 @@ function renderGreeting(){
   var who = ME ? firstName(ME.display_name || ME.username) : "";
   return '<div class="greet"><h2>' + (now.getHours() < 12 ? 'صباح الخير' : 'مساء الخير') + (who ? '، ' + esc(who) : '') + '</h2>' +
     '<div class="greet-sub">' + day + ' ' + fmtDate(iso) + ' · ' + hijriLabel(iso) + '</div></div>';
+}
+/* رسم الدخل والمصروفات لكل شهر هجري في السنة المختارة (محرم يمين) */
+var HIJRI_SHORT = ["محرم","صفر","ربيع ١","ربيع ٢","جمادى ١","جمادى ٢","رجب","شعبان","رمضان","شوال","القعدة","الحجة"];
+function monthlyChart(state, year){
+  var inc = [0,0,0,0,0,0,0,0,0,0,0,0], exp = inc.slice();
+  state.payments.forEach(function(p){ var h = hijriParts(p.date); if(h.year === year && h.month) inc[h.month - 1] += p.amount || 0; });
+  state.expenses.forEach(function(e){ var h = hijriParts(e.date); if(h.year === year && h.month) exp[h.month - 1] += e.amount || 0; });
+  var max = Math.max.apply(null, inc.concat(exp));
+  if(!max) return '<div class="chart-empty">ما فيه حركات مسجلة في ' + year + 'هـ.</div>';
+  var step = Math.pow(10, Math.floor(Math.log10(max))), top = Math.ceil(max / step) * step;
+  if(top / step > 5) step *= 2; top = Math.ceil(max / step) * step;
+  var W = 640, H = 270, L = 8, R = 46, T = 10, B = 28, cw = (W - L - R) / 12, bw = Math.min(14, cw / 2 - 4);
+  function y(v){ return T + (H - T - B) * (1 - v / top); }
+  function bar(x, v, cls){ if(!v) return ''; var yy = y(v), h = H - B - yy, r = Math.min(4, h, bw / 2);
+    return '<path class="' + cls + '" d="M' + x + ',' + (H - B) + 'V' + (yy + r) + 'Q' + x + ',' + yy + ' ' + (x + r) + ',' + yy + 'H' + (x + bw - r) + 'Q' + (x + bw) + ',' + yy + ' ' + (x + bw) + ',' + (yy + r) + 'V' + (H - B) + 'Z"/>'; }
+  function k(v){ return v >= 1000 ? (Math.round(v / 100) / 10) + 'k' : String(v); }
+  var g = '';
+  for(var t = 0; t <= top; t += step) g += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(t) + '" y2="' + y(t) + '"/><text class="ax" x="' + (W - R + 8) + '" y="' + (y(t) + 4) + '">' + k(t) + '</text>';
+  var cols = HIJRI_SHORT.map(function(name, i){
+    var cx = W - R - cw * (i + 0.5), x0 = cx - bw - 1;
+    var tip = HIJRI_MONTHS[i] + ' ' + year + 'هـ — الدخل: ' + fmtMoney(inc[i]) + ' · المصروفات: ' + fmtMoney(exp[i]);
+    return '<g class="col"><title>' + esc(tip) + '</title><rect class="hit" x="' + (cx - cw / 2) + '" y="' + T + '" width="' + cw + '" height="' + (H - T) + '"/>' +
+      bar(x0 + bw + 2, inc[i], "b-inc") + bar(x0, exp[i], "b-exp") +
+      '<text class="ax" text-anchor="middle" x="' + cx + '" y="' + (H - 8) + '">' + name + '</text></g>';
+  }).join("");
+  return '<div class="chart-wrap"><svg class="mchart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="الدخل والمصروفات لكل شهر في ' + year + 'هـ">' + g + cols + '</svg></div>';
 }
 /* ---------- لوحة المؤشرات (BI) ---------- */
 function biRow(label, paid, late, extra, tipPaid, tipLate, drill){
@@ -1298,7 +1365,7 @@ function renderMembersTab(state, ui){
     }).join("");
     return '<tr>' +
       '<td class="hint seq-cell">' + (m.seq!=null ? m.seq : "—") + '</td>' +
-      '<td class="name-cell">' + esc(m.name) + (m.isDemo?'<span class="demo-tag">تجريبي</span>':"") + (stOf[m.id] && stOf[m.id].count ? '<span class="late-tag" title="' + esc(stOf[m.id].late.map(lateText).join("، ")) + '">متأخر ' + stOf[m.id].count + '</span>' : '') + '</td>' +
+      '<td class="name-cell"><span class="av">' + esc(String(m.name || "؟").trim().charAt(0)) + '</span>' + esc(m.name) + (m.isDemo?'<span class="demo-tag">تجريبي</span>':"") + (stOf[m.id] && stOf[m.id].count ? '<span class="late-tag" title="' + esc(stOf[m.id].late.map(lateText).join("، ")) + '">متأخر ' + stOf[m.id].count + '</span>' : '') + '</td>' +
       '<td data-label="' + esc(periodName(state, year, 1)) + '">' + statusBtn(m.id, 1, info.inst1, 0, ui, info.paid1) + '</td>' +
       '<td data-label="' + esc(periodName(state, year, 2)) + '">' + statusBtn(m.id, 2, info.inst2, 0, ui, info.paid2) + '</td>' +
       campCells +
@@ -2350,13 +2417,13 @@ var UI = {activeTab:"overview", search:"", logSearch:"", page:1, modal:null, can
 
 /* ---------- لون الهوية: تختاره الإدارة ويتطبّق على الموقع كامل ---------- */
 var ACCENTS = {
-  emerald:{name:"زمردي", l:"#0E7C66", ld:"#0A6653", d:"#1FAE8E", dfg:"#04201A"},
-  teal:{name:"فيروزي", l:"#0E7490", ld:"#0B5C73", d:"#22B8CF", dfg:"#032029"},
-  blue:{name:"أزرق", l:"#2557C7", ld:"#1C45A3", d:"#6B98F2", dfg:"#06142E"},
-  plum:{name:"بنفسجي", l:"#6D3FC0", ld:"#57309C", d:"#A385EE", dfg:"#160A2E"},
-  maroon:{name:"عنابي", l:"#A3324A", ld:"#84273B", d:"#E87A8E", dfg:"#2A0810"},
-  copper:{name:"نحاسي", l:"#B0602A", ld:"#8F4C1F", d:"#E59A5A", dfg:"#2A1306"},
-  graphite:{name:"فحمي", l:"#3B4A5C", ld:"#283442", d:"#9AAABB", dfg:"#0B1220"}
+  emerald:{name:"زمردي", l:"#0E7C66", ld:"#0A6653", d:"#1FAE8E", dfg:"#04201A", ci:"#13A182", ce:"#D4643F"},
+  teal:{name:"فيروزي", l:"#0E7490", ld:"#0B5C73", d:"#22B8CF", dfg:"#032029", ci:"#0F93B0", ce:"#D4643F"},
+  blue:{name:"أزرق", l:"#2557C7", ld:"#1C45A3", d:"#6B98F2", dfg:"#06142E", ci:"#3F6FBF", ce:"#D4643F"},
+  plum:{name:"بنفسجي", l:"#6D3FC0", ld:"#57309C", d:"#A385EE", dfg:"#160A2E", ci:"#7B55D3", ce:"#D4643F"},
+  maroon:{name:"عنابي", l:"#A3324A", ld:"#84273B", d:"#E87A8E", dfg:"#2A0810", ci:"#A3324A", ce:"#4E7FB8"},
+  copper:{name:"نحاسي", l:"#B0602A", ld:"#8F4C1F", d:"#E59A5A", dfg:"#2A1306", ci:"#B0602A", ce:"#4E7FB8"},
+  graphite:{name:"فحمي", l:"#3B4A5C", ld:"#283442", d:"#9AAABB", dfg:"#0B1220", ci:"#3F6FBF", ce:"#D4643F"}
 };
 var ACCENT_ON = "";
 function accentKey(){
@@ -2370,7 +2437,8 @@ function applyAccent(){
   var a = ACCENTS[k];
   var light = "--primary:" + a.l + ";--primary-dark:" + a.ld + ";--primary-soft:color-mix(in srgb," + a.l + " 11%,#fff);--ink:" + a.l + ";--ink-fg:#fff;" +
     "--nav-bar:" + a.d + ";--nav-on:color-mix(in srgb," + a.d + " 20%,transparent);--side-bg:color-mix(in srgb," + a.l + " 20%,#05090b);" +
-    "--side-text:color-mix(in srgb," + a.d + " 14%,#e6edf0);--side-muted:color-mix(in srgb," + a.d + " 40%,#8b979c);--mark-a:" + a.d + ";--mark-b:" + a.l + ";";
+    "--side-text:color-mix(in srgb," + a.d + " 14%,#e6edf0);--side-muted:color-mix(in srgb," + a.d + " 40%,#8b979c);--mark-a:" + a.d + ";--mark-b:" + a.l + ";" +
+    "--c-inc:" + a.ci + ";--c-exp:" + a.ce + ";";
   var dark = "--primary:" + a.d + ";--primary-dark:color-mix(in srgb," + a.d + " 82%,#fff);--primary-soft:color-mix(in srgb," + a.d + " 15%,transparent);" +
     "--ink:" + a.d + ";--ink-fg:" + a.dfg + ";--side-bg:color-mix(in srgb," + a.d + " 7%,#05080a);";
   var el = document.getElementById("accent-style");
