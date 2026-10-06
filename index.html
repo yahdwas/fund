@@ -636,14 +636,63 @@ h1,h2,h3,.stat-value,.b-name{letter-spacing:0}
 .av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--primary-soft);color:var(--primary);font-weight:700;font-size:12.5px;margin-inline-end:10px;vertical-align:middle;flex-shrink:0}
 @media (max-width:1100px){.dash-grid{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:760px){.stat-card.hero{grid-column:1/-1}.stat-sub{white-space:normal}}
+
+/* ===== v1.0.4: صفحة العضو، سجل التحديثات، الدخول ===== */
+button.app-ver{background:none;border:0;padding:2px 4px;border-radius:6px;cursor:pointer;font-family:inherit}
+button.app-ver:hover{color:#fff;background:var(--side-active)}
+button.more-ver{background:none;border:0;cursor:pointer;font-family:inherit}
+.mem-link{display:inline-flex;align-items:center;background:none;border:0;padding:0;margin:0;font:inherit;font-weight:600;color:var(--text);cursor:pointer;text-align:right}
+.mem-link:hover{color:var(--primary)}
+.ok-tag{display:inline-block;font-size:10.5px;font-weight:700;color:var(--success);background:var(--success-soft);border-radius:99px;padding:1px 8px;white-space:nowrap}
+.member-modal{max-width:560px}
+.mm-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.mm-head>div{flex:1;min-width:0}
+.mm-head h2{margin:0;font-size:18px}
+.av-lg{width:48px;height:48px;font-size:19px;margin:0}
+.mm-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mm-stats>div{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;min-width:0}
+.mm-stats>div>span{display:block;font-size:11.5px;color:var(--text-muted)}
+.mm-stats b{font-size:16px;font-variant-numeric:tabular-nums}
+.mm-stats b.crit{color:var(--critical)}
+.mm-sec{font-size:14px;margin:18px 0 8px}
+.mm-late{display:flex;flex-direction:column;gap:6px}
+.mm-late div{display:flex;align-items:center;gap:8px;font-size:13px;background:var(--critical-soft);border-radius:10px;padding:8px 10px}
+.mm-late i{width:7px;height:7px;border-radius:50%;background:var(--critical);flex-shrink:0}
+.mm-pays{max-height:300px;overflow:auto}
+.changelog{display:flex;flex-direction:column;gap:14px;max-height:60vh;overflow:auto}
+.cl-head{display:flex;align-items:center;gap:8px}
+.cl-head .hint{margin-inline-start:auto}
+.changelog ul{margin:6px 0 0;padding-inline-start:20px;font-size:13.5px;color:var(--text-2)}
+.changelog li{margin:3px 0}
+.auth-brand{display:none}
+@media (min-width:900px){
+ .auth-wrap{gap:72px}
+ .auth-brand{display:block;color:#fff;max-width:340px}
+ .auth-card .auth-head{display:none}
+ .auth-card .auth-p{font-size:15px;color:var(--text);font-weight:600;margin-top:0}
+ .auth-brand .bmark{width:72px;height:72px;border-radius:22px;font-size:40px;margin-bottom:20px}
+ .auth-brand h1{font-size:30px;margin:0;color:#fff}
+ .auth-brand p{margin:4px 0 28px;color:var(--side-muted);font-size:15px}
+ .auth-brand ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+ .auth-brand li{display:flex;align-items:center;gap:12px;color:var(--side-text);font-size:14.5px}
+ .auth-brand li .ic{width:20px;height:20px;padding:8px;box-sizing:content-box;border-radius:11px;background:rgba(255,255,255,.07);color:var(--mark-a,#1FAE8E)}
+}
+@media (max-width:620px){.mm-stats b{font-size:14px}.member-modal{padding:18px}}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script id="app-logic">
 "use strict";
-/* رقم نسخة الموقع: يظهر أسفل القائمة وفي شاشة الدخول. زِده مع كل تحديث */
-var APP_VERSION = "1.0.3";
+/* سجل التحديثات: أضف النسخة الجديدة فوق، ورقم النسخة يتحدّث منها تلقائياً */
+var CHANGELOG = [
+  {v:"1.0.4", d:"2026-10-06", items:["صفحة لكل عضو: اضغط على اسمه وتشوف دفعاته ومتأخراته ومساهماته", "شاشة دخول جديدة", "سجل التحديثات: اضغط على رقم النسخة"]},
+  {v:"1.0.3", d:"2026-10-06", items:["لوحة نظرة عامة جديدة فيها رسم الدخل والمصروفات لكل شهر", "آخر الحركات في الصفحة الرئيسية", "دائرة بأول حرف جنب اسم كل عضو"]},
+  {v:"1.0.2", d:"2026-10-06", items:["خط جديد أوضح", "لون الهوية تختاره الإدارة من سبعة ألوان", "زر الوضع واختيار السنة صاروا في مكان واحد فوق"]},
+  {v:"1.0.1", d:"2026-10-05", items:["إصلاح حقول كانت تطلع برا الشاشة في الجوال"]},
+  {v:"1.0.0", d:"2026-10-05", items:["شريط تنقل سفلي في الجوال", "الأعضاء كبطاقات في الجوال مع تصفية المتأخرين", "شعار جديد ورقم النسخة"]}
+];
+var APP_VERSION = CHANGELOG[0].v;
 
 /* ---------- helpers ---------- */
 function uid(prefix){ return (prefix||"id") + "_" + Math.random().toString(36).slice(2,9); }
@@ -919,7 +968,7 @@ function renderApp(state, ui){
   return '<div class="shell"><aside class="side">' +
       '<div class="s-brand"><div class="bmark">ز</div><div><div class="b-name">' + esc(state.meta.fundName) + '</div><div class="b-sub">صندوق العائلة</div></div></div>' +
       '<nav class="nav tabs" role="tablist">' + renderTabs(ui, lateN) + '</nav>' +
-      '<div class="side-foot"><div class="sf-user"><b>' + esc(ME ? (ME.display_name || ME.username) : '') + '</b><span>' + (ui.canWrite === false ? 'عرض فقط' : 'مدير') + '</span></div><span class="app-ver">v' + APP_VERSION + '</span></div>' +
+      '<div class="side-foot"><div class="sf-user"><b>' + esc(ME ? (ME.display_name || ME.username) : '') + '</b><span>' + (ui.canWrite === false ? 'عرض فقط' : 'مدير') + '</span></div><button type="button" class="app-ver" data-action="open-changelog" title="وش الجديد">v' + APP_VERSION + '</button></div>' +
     '</aside><div class="main">' + renderTopbar(state, ui) +
     '<div class="panel">' + renderTabContent(state, ui) + '</div></div></div>' + renderMoreSheet(ui, lateN) +
     (ui.modal ? renderModal(state, ui) : "") +
@@ -968,7 +1017,7 @@ function renderMoreSheet(ui, lateN){
   if(!ui.moreOpen) return "";
   return '<div class="more-back" data-action="toggle-more"></div><div class="more-sheet" role="menu">' +
     visibleTabs(ui).filter(function(t){ return MOBILE_TABS.indexOf(t.id) < 0; }).map(function(t){ return tabBtn(t, ui, lateN, "more-item"); }).join("") +
-    '<div class="more-ver">' + esc(ME ? (ME.display_name || ME.username) : '') + ' · v' + APP_VERSION + '</div></div>';
+    '<button type="button" class="more-ver" data-action="open-changelog">' + esc(ME ? (ME.display_name || ME.username) : '') + ' · v' + APP_VERSION + ' · وش الجديد</button></div>';
 }
 function payLabel(state, p){
   if(p.type === "دفعة أساسية") return periodName(state, p.year, p.installment);
@@ -1365,7 +1414,7 @@ function renderMembersTab(state, ui){
     }).join("");
     return '<tr>' +
       '<td class="hint seq-cell">' + (m.seq!=null ? m.seq : "—") + '</td>' +
-      '<td class="name-cell"><span class="av">' + esc(String(m.name || "؟").trim().charAt(0)) + '</span>' + esc(m.name) + (m.isDemo?'<span class="demo-tag">تجريبي</span>':"") + (stOf[m.id] && stOf[m.id].count ? '<span class="late-tag" title="' + esc(stOf[m.id].late.map(lateText).join("، ")) + '">متأخر ' + stOf[m.id].count + '</span>' : '') + '</td>' +
+      '<td class="name-cell"><button type="button" class="mem-link" data-action="open-member" data-id="' + m.id + '"><span class="av">' + esc(String(m.name || "؟").trim().charAt(0)) + '</span>' + esc(m.name) + '</button>' + (m.isDemo?'<span class="demo-tag">تجريبي</span>':"") + (stOf[m.id] && stOf[m.id].count ? '<span class="late-tag" title="' + esc(stOf[m.id].late.map(lateText).join("، ")) + '">متأخر ' + stOf[m.id].count + '</span>' : '') + '</td>' +
       '<td data-label="' + esc(periodName(state, year, 1)) + '">' + statusBtn(m.id, 1, info.inst1, 0, ui, info.paid1) + '</td>' +
       '<td data-label="' + esc(periodName(state, year, 2)) + '">' + statusBtn(m.id, 2, info.inst2, 0, ui, info.paid2) + '</td>' +
       campCells +
@@ -1678,8 +1727,41 @@ function renderFamNameModal(state, m){
 }
 
 /* ---------- modals ---------- */
+function renderMemberModal(state, m){
+  var mem = state.members.find(function(x){ return x.id === m.id; });
+  var close = '<div class="modal-actions"><button type="button" class="btn btn-ghost" data-action="close-modal">إغلاق</button></div>';
+  if(!mem) return modalWrap("غير موجود", close);
+  var st = memberStatus(state, mem.id), fam = familyOf(state, mem.id);
+  var pays = state.payments.filter(function(p){ return p.memberId === mem.id; }).map(function(p){ return {date:p.date, label:payLabel(state, p), amt:p.amount}; });
+  (state.graveContributions || []).filter(function(g){ return g.memberId === mem.id; }).forEach(function(g){
+    var c = (state.graveCases || []).find(function(x){ return x.id === g.caseId; });
+    pays.push({date:g.date, label:"القبر — " + (c ? c.name : "حالة محذوفة"), amt:g.amount});
+  });
+  pays.sort(function(a, b){ return (b.date || "").localeCompare(a.date || ""); });
+  var total = pays.reduce(function(x, p){ return x + (p.amt || 0); }, 0);
+  return '<div class="modal-overlay" data-action="overlay-close"><div class="modal member-modal">' +
+    '<div class="mm-head"><span class="av av-lg">' + esc(String(mem.name || "؟").trim().charAt(0)) + '</span><div><h2>' + esc(mem.name) + '</h2>' +
+      '<div class="hint">' + (fam ? esc(fam.name) + ' · ' : '') + 'رقم ' + (mem.seq != null ? mem.seq : "—") + '</div></div>' +
+      (st.count ? '<span class="late-tag">متأخر ' + st.count + '</span>' : '<span class="ok-tag">ما عليه شي</span>') + '</div>' +
+    '<div class="mm-stats"><div><span>إجمالي ما دفع</span><b>' + fmtMoneyHtml(total) + '</b></div><div><span>عدد الدفعات</span><b>' + pays.length + '</b></div>' +
+      '<div><span>المتأخرات</span><b' + (st.arrears ? ' class="crit"' : '') + '>' + (st.arrears ? fmtMoneyHtml(st.arrears) : (st.count ? st.count + ' بند' : '—')) + '</b></div></div>' +
+    (st.count ? '<h3 class="mm-sec">المتأخرات</h3><div class="mm-late">' + st.late.map(function(l){ return '<div><i></i>' + esc(lateText(l)) + '</div>'; }).join("") + '</div>' : '') +
+    '<h3 class="mm-sec">الدفعات</h3>' +
+    (pays.length ? '<div class="activity-list mm-pays">' + pays.map(function(p){
+      return '<div class="activity-item"><div><div class="a-title">' + esc(p.label) + '</div><div class="a-sub">' + hijriShort(p.date) + ' · ' + fmtDate(p.date) + '</div></div><div class="a-amt">' + fmtMoneyHtml(p.amt) + '</div></div>';
+    }).join("") + '</div>' : '<div class="chart-empty" style="min-height:90px">ما سجّل أي دفعة للحين.</div>') +
+    close + '</div></div>';
+}
+function renderChangelogModal(){
+  return modalWrap("وش الجديد", '<div class="changelog">' + CHANGELOG.map(function(c, i){
+    return '<div class="cl-item"><div class="cl-head"><b>v' + c.v + '</b>' + (i === 0 ? '<span class="ok-tag">الحالية</span>' : '') + '<span class="hint">' + fmtDate(c.d) + '</span></div>' +
+      '<ul>' + c.items.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>';
+  }).join("") + '</div><div class="modal-actions"><button type="button" class="btn btn-ghost" data-action="close-modal">إغلاق</button></div>');
+}
 function renderModal(state, ui){
   var m = ui.modal;
+  if(m.type === "member") return renderMemberModal(state, m);
+  if(m.type === "changelog") return renderChangelogModal();
   if(m.type === "drill") return renderDrillModal(state, m);
   if(m.type === "memEdit") return renderMemEditModal(state, m);
   if(m.type === "itemName") return modalWrap("تعديل البند",
@@ -2481,6 +2563,8 @@ function onClick(e){
   if(action === "late-fam-open"){ var lk = t.getAttribute("data-fam"); UI.lateOpen = UI.lateOpen || {}; UI.lateOpen[lk] = !UI.lateOpen[lk]; render(); return; }
   if(action === "late-type"){ UI.lateType = t.getAttribute("data-type"); render(); return; }
   if(action === "set-accent"){ var ak = t.getAttribute("data-k"); if(ACCENTS[ak] && ak !== accentKey()) doPublish(function(s){ s.settings.accent = ak; return s; }); return; }
+  if(action === "open-member"){ UI.moreOpen = false; UI.modal = {type:"member", id:t.getAttribute("data-id")}; render(); return; }
+  if(action === "open-changelog"){ UI.moreOpen = false; UI.modal = {type:"changelog"}; render(); return; }
   if(action === "toggle-more"){ UI.moreOpen = !UI.moreOpen; render(); return; }
   if(action === "mem-filter"){ UI.memFilter = t.getAttribute("data-f"); UI.page = 1; render(); return; }
   if(action === "late-fam-all"){ var lfs = lateFamilies(STATE, UI.lateType), lo = UI.lateOpen = UI.lateOpen || {}; var allO = lfs.every(function(g){ return lo[g.id || "_none"]; }); lfs.forEach(function(g){ lo[g.id || "_none"] = !allO; }); render(); return; }
@@ -3115,7 +3199,10 @@ function renderAuth(){
     '<label>كلمة المرور<input class="input ltr" type="password" name="password" autocomplete="current-password" required></label>' +
     '<div class="auth-err">' + esc(AUTH.err || "") + '</div>' +
     '<button class="btn btn-primary auth-btn" type="submit"' + (AUTH.busy ? ' disabled' : '') + '>' + (AUTH.busy ? 'جاري الدخول…' : 'دخول') + '</button></form>';
-  return '<div class="auth-wrap"><div class="auth-card">' + head + body + '<div class="auth-ver">v' + APP_VERSION + '</div></div>' +
+  var brand = '<div class="auth-brand"><div class="bmark">ز</div><h1>جمعية ال زايد</h1><p>صندوق العائلة</p><ul>' +
+    [["members","دفعات العائلة كلها في مكان واحد"],["late","متابعة المتأخرين أول بأول"],["reports","تقارير واضحة لكل سنة"]].map(function(f){ return '<li>' + icon(f[0]) + '<span>' + f[1] + '</span></li>'; }).join("") +
+    '</ul></div>';
+  return '<div class="auth-wrap">' + brand + '<div class="auth-card">' + head + body + '<div class="auth-ver">v' + APP_VERSION + '</div></div>' +
     '<button type="button" class="auth-theme" data-action="toggle-theme">' + icon(dark ? "sun" : "moon") + '</button></div>';
 }
 async function onAuthSubmit(e){
