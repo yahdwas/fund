@@ -682,6 +682,13 @@ button.more-ver{background:none;border:0;cursor:pointer;font-family:inherit}
 /* ===== v1.0.6 ===== */
 .status-btn.none{color:var(--text-muted);background:var(--surface-2);border-color:var(--border)}
 .status-btn:disabled{cursor:default}
+
+/* ===== v1.0.7: التقارير ===== */
+.rep-drill{padding:0;font-size:inherit;text-align:right}
+.rep-names{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:column;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.rep-names div{padding:8px 12px;border-bottom:1px solid var(--border);font-size:13.5px;display:flex;gap:10px;align-items:center;min-width:0}
+.rep-names span{color:var(--text-muted);font-size:12px;min-width:22px;font-variant-numeric:tabular-nums}
+@media (max-width:620px){.rep-names{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none!important;grid-auto-flow:row}}
 </style>
 </head>
 <body>
@@ -690,6 +697,7 @@ button.more-ver{background:none;border:0;cursor:pointer;font-family:inherit}
 "use strict";
 /* سجل التحديثات: أضف النسخة الجديدة فوق، ورقم النسخة يتحدّث منها تلقائياً */
 var CHANGELOG = [
+  {v:"1.0.7", d:"2026-10-06", items:["تقرير الإيرادات: عمود «دفعوا» (كم عضو من الكل) بدل عدد الدفعات، وانشال سجل الإيرادات بالتفصيل", "الضغط على اسم البند في تقرير الإيرادات يعرض اللي ما دفعوا وتسجل لهم من نفس النافذة", "PDF الإيرادات: الجدول بس", "تقرير المقبرة: الأسماء بس في 3 أعمدة مرتبة بالتسلسل، وفي آخر كل تقرير «انتهى التقرير»"]},
   {v:"1.0.6", d:"2026-10-06", items:["جدول الأعضاء: عمود لكل بند في السنة (الدفعات، الدعم، البنود الخاصة، الدعم الفردي، القبر)", "تسجيل الدفعة: كل خيارات الدعم صارت تحت «الدعم»", "الإدارة: قسم «الدعم الفردي» لدعم اختياري ما ينحسب على الباقين"]},
   {v:"1.0.5", d:"2026-10-06", items:["تسجيل الدفعة: تقدر تكتب أي مبلغ للقبر والبنود الخاصة بدون ما تنحصر في أرقام محددة", "أزرار 25 و50 صارت ضمن المبالغ السريعة"]},
   {v:"1.0.4", d:"2026-10-06", items:["صفحة لكل عضو: اضغط على اسمه وتشوف دفعاته ومتأخراته ومساهماته", "شاشة دخول جديدة", "سجل التحديثات: اضغط على رقم النسخة"]},
@@ -2172,6 +2180,14 @@ function lateReportData(state, kind, sel){
   if(rest.length) addGroup("بدون أسرة", rest);
   return {sel:sel, label:label, groups:groups, lateCount:lateCount, owed:owed, opts:opts};
 }
+/* مفتاح البند عشان نفتح منه قائمة اللي دفعوا/ما دفعوا (نفس نافذة لوحة المؤشرات) */
+function repPayKey(state, p){
+  if(p.type === "دفعة أساسية") return "p:" + p.year + "-" + p.installment;
+  if(p.campaignId) return "c:" + p.campaignId;
+  if(p.type === "بند خاص" && p.fundId) return "f:" + p.fundId;
+  return null;
+}
+function isVoluntaryKey(state, key){ if(!key || key.indexOf("f:") !== 0) return false; var f = (state.funds||[]).find(function(x){ return x.id === key.slice(2); }); return !!(f && f.voluntary); }
 function buildReport(state, kind, year, sel){
   var cur = state.settings.currency;
   var M = function(n){ return fmtMoney(n, cur); };
@@ -2187,15 +2203,16 @@ function buildReport(state, kind, year, sel){
     var sup = pays.filter(function(p){ return p.campaignId || p.type === "دعم إضافي"; });
     var don = pays.filter(function(p){ return p.type === "تبرع"; });
     var payers = {}; pays.forEach(function(p){ payers[p.memberId] = 1; });
-    rep.summary = [["إجمالي الإيرادات", M(repSum(pays))], ["الدفعات", M(repSum(sub))], ["الدعم", M(repSum(sup))], ["التبرعات الفردية", M(repSum(don))], ["البنود الخاصة", M(repSum(pays.filter(function(p){ return p.type === "بند خاص"; })))], ["عدد الدفعات", String(pays.length)], ["عدد الأعضاء الدافعين", String(Object.keys(payers).length)]];
+    rep.summary = [["إجمالي الإيرادات", M(repSum(pays))], ["الدفعات", M(repSum(sub))], ["الدعم", M(repSum(sup))], ["التبرعات الفردية", M(repSum(don))], ["البنود الخاصة", M(repSum(pays.filter(function(p){ return p.type === "بند خاص"; })))], ["عدد الأعضاء الدافعين", String(Object.keys(payers).length)]];
+    var nAll = state.members.length;
+    function who(list){ return Object.keys(list.reduce(function(o,p){ o[p.memberId] = 1; return o; }, {})).length; }
+    rep.pdfTableOnly = true;
     rep.sections.push({heading:"الإيرادات حسب البند",
-      cols:[{label:"البند", w:0.55}, {label:"عدد الدفعات", w:0.2}, {label:"المبلغ", w:0.25, num:true}],
-      rows: order.map(function(k){ return [k, String(groups[k].length), M(repSum(groups[k]))]; }),
-      total: ["الإجمالي", String(pays.length), M(repSum(pays))]});
-    rep.sections.push({heading:"سجل الإيرادات بالتفصيل",
-      cols:[{label:"التاريخ", w:0.2}, {label:"العضو", w:0.42}, {label:"البند", w:0.23}, {label:"المبلغ", w:0.15, num:true}],
-      rows: pays.map(function(p){ return [hijriLabel(p.date), repMemberName(state, p.memberId), repPayCategory(state, p), M(p.amount)]; }),
-      total: ["", "الإجمالي", "", M(repSum(pays))], empty:"ما فيه إيرادات مسجلة في هذي الفترة."});
+      cols:[{label:"البند", w:0.55}, {label:"دفعوا", w:0.2}, {label:"المبلغ", w:0.25, num:true}],
+      rows: order.map(function(k){ var key = repPayKey(state, groups[k][0]), vol = !key || groups[k][0].type === "تبرع" || isVoluntaryKey(state, key);
+        return [k, vol ? who(groups[k]) + " داعم" : who(groups[k]) + " من " + nAll, M(repSum(groups[k]))]; }),
+      drill: order.map(function(k){ return repPayKey(state, groups[k][0]); }),
+      total: ["الإجمالي", who(pays) + " من " + nAll, M(repSum(pays))], empty:"ما فيه إيرادات مسجلة في هذي الفترة."});
   }
   else if(kind === "expenses"){
     rep.title = "تقرير المصروفات";
@@ -2247,10 +2264,9 @@ function buildReport(state, kind, year, sel){
     cases.forEach(function(c){
       var cs = (state.graveContributions||[]).filter(function(g){ return g.caseId === c.id; })
         .slice().sort(function(a,b){ return ((state.members.find(function(m){return m.id===a.memberId;})||{}).seq||0) - ((state.members.find(function(m){return m.id===b.memberId;})||{}).seq||0); });
-      rep.sections.push({heading:"مساهمات: " + c.name + " (" + hijriLabel(c.date) + ")" + (c.note ? " — " + c.note : ""),
-        cols:[{label:"#", w:0.08}, {label:"العضو", w:0.67}, {label:"المبلغ", w:0.25, num:true}],
-        rows: cs.map(function(g, i){ return [String(i+1), repMemberName(state, g.memberId), M(g.amount)]; }),
-        total: ["", "المجموع", M(repSum(cs))], empty:"ما فيه مساهمات مسجلة لهذي الحالة."});
+      rep.sections.push({type:"names", heading:"المساهمون: " + c.name + " (" + hijriLabel(c.date) + ")" + (c.note ? " — " + c.note : "") + " — " + cs.length + " عضو",
+        names: cs.map(function(g){ var mm = state.members.find(function(m){ return m.id === g.memberId; }); return {seq: mm && mm.seq != null ? String(mm.seq) : "", name: mm ? mm.name : "عضو محذوف"}; }),
+        empty:"ما فيه مساهمات مسجلة لهذي الحالة."});
     });
   }
   return rep;
@@ -2266,6 +2282,11 @@ function renderReportsTab(state, ui){
   var kinds = [["income","الإيرادات"],["expenses","المصروفات"],["grave","المقبرة"],["late-dues","المتأخرين في الدفعات"],["late-support","المتأخرين في الدعم"]];
   var PREVIEW = 60;
   var sections = rep.sections.map(function(sec){
+    if(sec.type === "names"){
+      return '<div style="margin-top:18px"><h3 style="font-size:14.5px;color:var(--primary-dark);margin-bottom:8px">' + esc(sec.heading) + '</h3>' +
+        (sec.names.length ? '<div class="rep-names" style="grid-template-rows:repeat(' + Math.ceil(sec.names.length / 3) + ',auto)">' + sec.names.map(function(n){ return '<div><span>' + esc(n.seq) + '</span>' + esc(n.name) + '</div>'; }).join("") + '</div>'
+          : '<div class="readonly-note">' + esc(sec.empty) + '</div>') + '</div>';
+    }
     if(sec.type === "groups"){
       return '<div style="margin-top:18px"><h3 style="font-size:14.5px;color:var(--primary-dark);margin-bottom:8px">' + esc(sec.heading) + '</h3>' +
         (sec.groups.length ? sec.groups.map(function(g){
@@ -2278,8 +2299,9 @@ function renderReportsTab(state, ui){
     }
     var shown = sec.rows.slice(0, PREVIEW);
     return '<div style="margin-top:18px"><h3 style="font-size:14.5px;color:var(--primary-dark);margin-bottom:8px">' + esc(sec.heading) + '</h3>' +
+      (sec.drill && sec.rows.length ? '<div class="hint" style="margin:-4px 0 8px">اضغط على اسم البند تشوف اللي ما دفعوا، وتقدر تسجل لهم الدفعة من هناك.</div>' : '') +
       (sec.rows.length ? '<div class="table-wrap"><table style="min-width:520px"><thead><tr>' + sec.cols.map(function(c){ return '<th>' + esc(c.label) + '</th>'; }).join("") + '</tr></thead><tbody>' +
-        shown.map(function(r){ return '<tr>' + r.map(function(v, i){ return '<td' + (sec.cols[i].num ? ' style="font-variant-numeric:tabular-nums;font-weight:600"' : '') + '>' + esc(v) + '</td>'; }).join("") + '</tr>'; }).join("") +
+        shown.map(function(r, ri){ var dk = sec.drill && sec.drill[ri]; return '<tr>' + r.map(function(v, i){ return '<td' + (sec.cols[i].num ? ' style="font-variant-numeric:tabular-nums;font-weight:600"' : '') + '>' + (i === 0 && dk ? '<button type="button" class="link-btn rep-drill" data-action="bi-drill" data-drill="' + esc(dk) + '" data-side="late" title="اضغط تشوف اللي ما دفعوا">' + esc(v) + '</button>' : esc(v)) + '</td>'; }).join("") + '</tr>'; }).join("") +
         (sec.total ? '<tr>' + sec.total.map(function(v){ return '<td style="font-weight:700;background:var(--surface-2)">' + esc(v) + '</td>'; }).join("") + '</tr>' : '') +
         '</tbody></table></div>' + (sec.rows.length > PREVIEW ? '<div class="hint" style="margin-top:6px">المعاينة تعرض أول ' + PREVIEW + ' من ' + sec.rows.length + ' سطر، والـ PDF فيه الكل.</div>' : '')
       : '<div class="readonly-note">' + esc(sec.empty || "ما فيه بيانات.") + '</div>') + '</div>';
@@ -2333,9 +2355,9 @@ function reportCanvases(rep){
   y += 62; font(700, 34, DFONT); ctx.fillStyle = C.ink; ctx.fillText(rep.title, right, y);
   y += 46; font(400, 22); ctx.fillStyle = C.muted; ctx.fillText("الفترة: " + rep.period + "   •   تاريخ الإصدار: " + rep.generated, right, y);
   y += 44;
-  // الملخص: بطاقات 3 في كل صف
+  // الملخص: بطاقات 3 في كل صف (تقرير الإيرادات: الجدول بس)
   var per = 3, gap = 18, bw = (cw - gap*(per-1)) / per, bh = 104;
-  for(var i = 0; i < rep.summary.length; i += per){
+  for(var i = 0; i < (rep.pdfTableOnly ? 0 : rep.summary.length); i += per){
     ensure(bh + gap);
     for(var j = 0; j < per && i + j < rep.summary.length; j++){
       var s = rep.summary[i+j], bx = right - (j+1)*bw - j*gap;
@@ -2365,6 +2387,30 @@ function reportCanvases(rep){
     y += RH;
   }
   rep.sections.forEach(function(sec){
+    if(sec.type === "names"){
+      ensure(60 + 40);
+      font(700, 24, DFONT); ctx.fillStyle = C.dark; ctx.textAlign = "right"; ctx.fillText(fit(sec.heading, cw), right, y + 18);
+      y += 50;
+      if(!sec.names.length){ font(400, 21); ctx.fillStyle = C.muted; ctx.fillText(sec.empty, right, y + 14); y += 60; return; }
+      var NC = 3, colW = cw / NC, LH = 40, ni = 0;
+      while(ni < sec.names.length){
+        if(y + LH > H - BOTTOM) newPage();
+        var rows = Math.min(Math.floor((H - BOTTOM - y) / LH), Math.ceil((sec.names.length - ni) / NC));
+        var chunk = sec.names.slice(ni, ni + rows * NC), top = y;
+        for(var r = 0; r < rows; r++){ if(r % 2){ ctx.fillStyle = "#FAFAF9"; ctx.fillRect(MX, top + r*LH, cw, LH); } }
+        chunk.forEach(function(n, k){
+          var col = Math.floor(k / rows), row = k % rows, xr = right - col*colW, yy = top + row*LH + LH/2;
+          ctx.textAlign = "right"; font(600, 17); ctx.fillStyle = C.muted; ctx.fillText(n.seq, xr - 10, yy);
+          font(500, 20); ctx.fillStyle = C.ink; ctx.fillText(fit(n.name, colW - 70), xr - 52, yy);
+        });
+        ctx.strokeStyle = C.line; ctx.lineWidth = 1; ctx.beginPath();
+        for(var cc = 1; cc < NC; cc++){ ctx.moveTo(right - cc*colW, top); ctx.lineTo(right - cc*colW, top + rows*LH); }
+        ctx.moveTo(MX, top); ctx.lineTo(right, top); ctx.moveTo(MX, top + rows*LH); ctx.lineTo(right, top + rows*LH); ctx.stroke();
+        y = top + rows*LH; ni += rows * NC;
+      }
+      y += 34;
+      return;
+    }
     if(sec.type === "groups"){
       ensure(60 + HH + RH);
       font(700, 26, DFONT); ctx.fillStyle = C.dark; ctx.textAlign = "right"; ctx.fillText(fit(sec.heading, cw), right, y + 18);
@@ -2417,6 +2463,9 @@ function reportCanvases(rep){
     if(sec.total){ if(y + RH > H - BOTTOM){ newPage(); drawHead(sec, xs); } drawRow(sec, xs, sec.total, 0, true); }
     y += 40;
   });
+  // نهاية التقرير
+  ensure(70); y += 10;
+  font(700, 22, DFONT); ctx.fillStyle = C.muted; ctx.textAlign = "center"; ctx.fillText("— انتهى التقرير —", W / 2, y + 20);
   // التذييل: رقم الصفحة
   pages.forEach(function(cv, i){
     var c = cv.getContext("2d"); c.direction = "rtl"; c.textBaseline = "middle";
