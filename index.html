@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>جمعية ال زايد</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700&family=Amiri:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Amiri:wght@700&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="var s=document.createElement('script');s.src='https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';document.head.appendChild(s)"></script>
 <style id="app-style">
 /* ===== ألوان ومتغيرات الموقع (مكان واحد لكل الألوان) ===== */
@@ -50,8 +50,8 @@
   --radius-sm:10px;
   --radius-md:14px;
   --radius-lg:16px;
-  --font-display:'Noto Kufi Arabic','Segoe UI',Tahoma,sans-serif;
-  --font-body:'Noto Kufi Arabic','Tahoma',Arial,sans-serif;
+  --font-display:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;
+  --font-body:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -312,14 +312,14 @@ tbody tr:hover{background:var(--surface-2);}
 .year-chip button{background:none;border:none;color:var(--critical);cursor:pointer;font-size:15px;padding:0 4px;}
 ::selection{background:var(--primary-soft);}
 /* ===== Theme: Mudeef ===== */
-body{font-family:'Noto Kufi Arabic','Segoe UI',Tahoma,system-ui,sans-serif;font-size:14.5px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);font-size:14.5px;-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:var(--font-display)}
 .ic{width:20px;height:20px;flex-shrink:0;display:block}
 #app{max-width:none;margin:0;padding:0}
 .shell{display:flex;min-height:100vh}
 .side{width:252px;flex-shrink:0;background:var(--side-bg);color:var(--side-text);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:20px 14px;z-index:40}
 .s-brand{display:flex;align-items:center;gap:12px;padding:4px 8px 22px}
-.bmark{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#1FAE8E,#0E7C66);display:grid;place-items:center;font-weight:700;font-size:20px;color:#fff;flex-shrink:0}
+.bmark{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--mark-a,#1FAE8E),var(--mark-b,#0E7C66));display:grid;place-items:center;font-weight:700;font-size:20px;color:#fff;flex-shrink:0}
 /* حرف «ز» بخط نسخي لأن الكوفي يظهره شبه j */
 .bmark{font-family:'Amiri','Noto Naskh Arabic','Traditional Arabic','Times New Roman',serif;font-size:26px;line-height:1;padding-bottom:4px;box-sizing:border-box}
 .b-name{font-weight:700;font-size:15.5px;color:#fff;line-height:1.3}
@@ -345,7 +345,7 @@ h1,h2,h3{font-family:var(--font-display)}
 .icon-btn:hover{background:var(--surface-2);color:var(--text)}
 .quickpay-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:11px;border:0;background:var(--primary);color:#fff;font-weight:600;font-size:14px;cursor:pointer;box-shadow:none;white-space:nowrap}
 .quickpay-btn:hover{background:var(--primary-dark);filter:none}
-:root[data-theme="dark"] .quickpay-btn{color:#04201A}
+:root[data-theme="dark"] .quickpay-btn{color:var(--ink-fg)}
 .quickpay-btn .ic{width:18px;height:18px}
 .year-pill{display:inline-flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border-2);color:var(--text);border-radius:9px;padding:0 4px 0 10px;height:28px;font-weight:600;font-size:12.5px}
 .year-pill select{border:0;background:transparent;font:inherit;color:inherit;font-weight:700;cursor:pointer;padding:0 2px}
@@ -376,7 +376,7 @@ h1,h2,h3{font-family:var(--font-display)}
 .btn-sm{height:32px;padding:0 12px;font-size:13px;border-radius:9px}
 .btn-primary{background:var(--primary);color:#fff}
 .btn-primary:hover{background:var(--primary-dark);opacity:1}
-:root[data-theme="dark"] .btn-primary{color:#04201A}
+:root[data-theme="dark"] .btn-primary{color:var(--ink-fg)}
 .btn-outline{background:var(--surface);border-color:var(--border-2);color:var(--text)}
 .btn-outline:hover{background:var(--surface-2)}
 .btn-ghost{background:var(--surface-3);color:var(--text)}
@@ -587,6 +587,22 @@ tbody tr:hover{background:var(--surface-2)}
  .mem-table .total-cell{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;border-top:1px dashed var(--border);padding-top:8px}
  .mem-table .total-cell::before{margin:0}
 }
+
+/* ===== v1.0.2: هوية وخطوط ===== */
+h1,h2,h3,.stat-value,.b-name{letter-spacing:0}
+.side-foot{align-items:flex-end}
+.sf-user b{color:#fff;font-weight:600;font-size:13px}
+.sf-user span{font-size:11px;color:var(--side-muted)}
+.side-foot .app-ver{font-size:11px;color:var(--side-muted);direction:ltr;font-variant-numeric:tabular-nums}
+.greet{margin:2px 0 18px}
+.greet h2{font-size:23px;font-weight:700;color:var(--text);line-height:1.4}
+.greet-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
+.accent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px;margin-top:12px}
+.accent-sw{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;font:600 13px var(--font-body);color:var(--text);transition:border-color .15s,box-shadow .15s}
+.accent-sw i{width:22px;height:22px;border-radius:50%;background:var(--sw);flex-shrink:0;box-shadow:inset 0 0 0 2px rgba(255,255,255,.3)}
+.accent-sw:hover{border-color:var(--border-2)}
+.accent-sw.on{border-color:var(--sw);box-shadow:0 0 0 3px color-mix(in srgb,var(--sw) 22%,transparent)}
+@media (max-width:760px){.greet h2{font-size:20px}.greet{margin-bottom:14px}}
 </style>
 </head>
 <body>
@@ -594,7 +610,7 @@ tbody tr:hover{background:var(--surface-2)}
 <script id="app-logic">
 "use strict";
 /* رقم نسخة الموقع: يظهر أسفل القائمة وفي شاشة الدخول. زِده مع كل تحديث */
-var APP_VERSION = "1.0.1";
+var APP_VERSION = "1.0.2";
 
 /* ---------- helpers ---------- */
 function uid(prefix){ return (prefix||"id") + "_" + Math.random().toString(36).slice(2,9); }
@@ -867,11 +883,10 @@ var ICONS = {
 function icon(n){ return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n]||"") + '</svg>'; }
 function renderApp(state, ui){
   var lateN = 0; try{ lateN = lateFamilies(state).reduce(function(x,g){ return x + g.late.length; }, 0); }catch(e){}
-  var dark = currentTheme() === "dark";
   return '<div class="shell"><aside class="side">' +
       '<div class="s-brand"><div class="bmark">ز</div><div><div class="b-name">' + esc(state.meta.fundName) + '</div><div class="b-sub">صندوق العائلة</div></div></div>' +
       '<nav class="nav tabs" role="tablist">' + renderTabs(ui, lateN) + '</nav>' +
-      '<div class="side-foot"><div class="sf-user"><span>' + esc(ME ? (ME.display_name || ME.username) : '') + '</span><small class="app-ver">v' + APP_VERSION + '</small></div><button type="button" class="side-theme" data-action="toggle-theme" aria-label="تبديل الوضع">' + icon(dark ? "sun" : "moon") + (dark ? 'فاتح' : 'ليلي') + '</button></div>' +
+      '<div class="side-foot"><div class="sf-user"><b>' + esc(ME ? (ME.display_name || ME.username) : '') + '</b><span>' + (ui.canWrite === false ? 'عرض فقط' : 'مدير') + '</span></div><span class="app-ver">v' + APP_VERSION + '</span></div>' +
     '</aside><div class="main">' + renderTopbar(state, ui) +
     '<div class="panel">' + renderTabContent(state, ui) + '</div></div></div>' + renderMoreSheet(ui, lateN) +
     (ui.modal ? renderModal(state, ui) : "") +
@@ -918,10 +933,8 @@ function renderTabs(ui, lateN){
 }
 function renderMoreSheet(ui, lateN){
   if(!ui.moreOpen) return "";
-  var dark = currentTheme() === "dark";
   return '<div class="more-back" data-action="toggle-more"></div><div class="more-sheet" role="menu">' +
     visibleTabs(ui).filter(function(t){ return MOBILE_TABS.indexOf(t.id) < 0; }).map(function(t){ return tabBtn(t, ui, lateN, "more-item"); }).join("") +
-    '<button type="button" class="nav-btn more-item" data-action="toggle-theme">' + icon(dark ? "sun" : "moon") + '<span class="nl">' + (dark ? 'الوضع الفاتح' : 'الوضع الليلي') + '</span></button>' +
     '<div class="more-ver">' + esc(ME ? (ME.display_name || ME.username) : '') + ' · v' + APP_VERSION + '</div></div>';
 }
 function payLabel(state, p){
@@ -1011,13 +1024,20 @@ function renderOverviewTab(state, ui){
       '<div class="a-amt" style="color:' + (a.kind==="in"?"var(--success)":"var(--critical)") + '">' + (a.kind==="in"?"+":"−") + fmtMoneyHtml(Math.abs(a.amt), state.settings.currency) + '</div></div>';
   }).join("") : '<div class="hint">لا توجد حركات مسجلة بعد.</div>';
 
-  return '<div class="stat-grid">' +
+  return renderGreeting() + '<div class="stat-grid">' +
     statCard("رصيد الصندوق", {html: fmtMoneyHtml(ov.balance, state.settings.currency)}, "", "wallet", "t-green") +
     statCard("تحصيل عام " + year + "هـ", {html: fmtMoneyHtml(ov.totalCollectedYear, state.settings.currency)}, "", "up", "t-blue") +
     statCard("مصروفات عام " + year + "هـ", {html: fmtMoneyHtml(ov.totalSpentYear, state.settings.currency)}, "crit", "down", "t-red") +
     statCard("سداد كامل", ov.fullyPaid + " من " + ov.memberCount, "accent", "check", "t-amber") +
     '</div>' +
     renderBI(state);
+}
+function renderGreeting(){
+  var now = new Date(), iso = todayISO();
+  var day = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"][now.getDay()];
+  var who = ME ? firstName(ME.display_name || ME.username) : "";
+  return '<div class="greet"><h2>' + (now.getHours() < 12 ? 'صباح الخير' : 'مساء الخير') + (who ? '، ' + esc(who) : '') + '</h2>' +
+    '<div class="greet-sub">' + day + ' ' + fmtDate(iso) + ' · ' + hijriLabel(iso) + '</div></div>';
 }
 /* ---------- لوحة المؤشرات (BI) ---------- */
 function biRow(label, paid, late, extra, tipPaid, tipLate, drill){
@@ -1290,7 +1310,6 @@ function renderMembersTab(state, ui){
   return '<div class="card">' +
     '<div class="hint" style="margin-bottom:10px">الدفعتان الأساسيتان تُحصَّلان في محرم ورجب من كل عام هجري. ترتيب الأعضاء كما في قائمتكم الأصلية.</div>' +
     '<div class="row-tools">' +
-      '<div class="year-nav"><label class="hint">السنة</label><select class="select" data-action="change-year">' + yearOpts + '</select></div>' +
       '<input class="input search-input" placeholder="بحث عن عضو…" data-action="search" value="' + esc(ui.search||"") + '">' +
     '</div>' + filterHtml +
     '<div class="table-wrap"><table class="mem-table"><thead><tr><th>#</th><th>العضو</th><th>' + esc(periodName(state, year, 1)) + '</th><th>' + esc(periodName(state, year, 2)) + '</th>' + yCamps.map(function(c){ return '<th>' + esc(c.name) + '</th>'; }).join("") + (hasExtra ? '<th>دعم تطوعي (قديم)</th>' : '') + '<th>الإجمالي</th></tr></thead>' +
@@ -1394,8 +1413,7 @@ function renderExpensesTab(state, ui){
 
   return '<div class="card">' +
     '<div class="row-tools">' +
-      '<div class="year-nav"><label class="hint">السنة</label><select class="select" data-action="change-year">' + yearOpts + '</select>' +
-      '<span class="hint">إجمالي عام ' + year + 'هـ: <strong style="color:var(--critical)">' + fmtMoney(total, state.settings.currency) + '</strong></span></div>' +
+      '<div class="year-nav"><span class="hint">إجمالي عام ' + year + 'هـ: <strong style="color:var(--critical)">' + fmtMoney(total, state.settings.currency) + '</strong></span></div>' +
       (canWrite ? '<button class="btn btn-primary" data-action="open-expense">+ إضافة مصروف</button>' : "") +
     '</div>' +
     '<div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>البند</th><th>الوصف</th><th>المبلغ</th><th></th></tr></thead>' +
@@ -1431,6 +1449,9 @@ function renderAdminTabCore(state, ui){
 
       '<div class="field span2"><button class="btn btn-primary" type="submit">حفظ الإعدادات</button></div>' +
     '</form></div>' +
+    '<div class="card admin-section"><h3>لون الهوية</h3><div class="hint">يتغيّر لون الموقع كامل لكل المستخدمين، في الوضع الفاتح والليلي.</div><div class="accent-grid">' +
+      Object.keys(ACCENTS).map(function(k){ return '<button type="button" class="accent-sw' + (k === accentKey() ? ' on' : '') + '" data-action="set-accent" data-k="' + k + '" style="--sw:' + ACCENTS[k].l + '"><i></i><span>' + ACCENTS[k].name + '</span></button>'; }).join("") +
+    '</div></div>' +
 
     '<div class="card admin-section"><h3>الدعم</h3>' +
     '<div class="hint">الدعم يتفعل من "تسجيل دفعة" باسم الشهر. من هنا تشوف كم سدد في كل دعم، وتحذف الدعم إذا انضاف بالغلط.</div>' +
@@ -2093,7 +2114,7 @@ function renderReportsTab(state, ui){
 /* رسم التقرير على صفحات A4 (canvas) ثم تجميعها في PDF */
 function reportCanvases(rep){
   var W = 1240, H = 1754, MX = 80, TOP = 90, BOTTOM = 110;
-  var FONT = '"Noto Kufi Arabic", Tahoma, Arial, sans-serif', DFONT = '"Noto Kufi Arabic", Tahoma, sans-serif';
+  var FONT = '"IBM Plex Sans Arabic", Tahoma, Arial, sans-serif', DFONT = '"IBM Plex Sans Arabic", Tahoma, sans-serif';
   var C = {ink:"#111111", muted:"#71717A", primary:"#111111", dark:"#111111", soft:"#F4F4F5", band:"#F7F7F6", line:"#E7E5E4"};
   var pages = [], ctx = null, y = 0, right = W - MX, cw = W - 2*MX;
   function newPage(){
@@ -2246,7 +2267,7 @@ async function downloadReportPdf(kind){
   var years = repYears(STATE);
   var year = UI.reportYear === 0 ? 0 : (UI.reportYear || years[0]);
   var rep = buildReport(STATE, kind, year, UI.reportSel);
-  try{ await Promise.all([document.fonts.load('400 20px "Noto Kufi Arabic"'), document.fonts.load('700 20px "Noto Kufi Arabic"')]); }catch(e){}
+  try{ await Promise.all([document.fonts.load('400 20px "IBM Plex Sans Arabic"'), document.fonts.load('700 20px "IBM Plex Sans Arabic"')]); }catch(e){}
   var blob = canvasesToPdf(reportCanvases(rep));
   var fname = rep.title.replace(/\s+/g, "-") + "-" + ((kind === "late-dues" || kind === "late-support") ? rep.period.replace(/[()]/g, "").replace(/\s+/g, "-") : (year ? year + "هـ" : "كل-السنوات")) + ".pdf";
   var dl = null;
@@ -2320,14 +2341,44 @@ function buildFullDocument(state){
   }
   var bodyHtml = renderApp(state, {activeTab:"overview", canWrite:true});
   return "<!doctype html>\n<html lang=\"ar\" dir=\"rtl\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>" +
-    esc(state.meta.fundName) + "</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700&family=Amiri:wght@700&display=swap\">\n<style id=\"app-style\">" +
+    esc(state.meta.fundName) + "</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Amiri:wght@700&display=swap\">\n<style id=\"app-style\">" +
     styleText + "</style>\n</head>\n<body>\n<div id=\"app\">" + bodyHtml + "</div>\n<script id=\"app-logic\">" + newScript + "<" + "/script>\n</body>\n</html>";
 }
 
 /* ---------- events ---------- */
 var UI = {activeTab:"overview", search:"", logSearch:"", page:1, modal:null, canWrite:null, toast:null, year:null};
 
+/* ---------- لون الهوية: تختاره الإدارة ويتطبّق على الموقع كامل ---------- */
+var ACCENTS = {
+  emerald:{name:"زمردي", l:"#0E7C66", ld:"#0A6653", d:"#1FAE8E", dfg:"#04201A"},
+  teal:{name:"فيروزي", l:"#0E7490", ld:"#0B5C73", d:"#22B8CF", dfg:"#032029"},
+  blue:{name:"أزرق", l:"#2557C7", ld:"#1C45A3", d:"#6B98F2", dfg:"#06142E"},
+  plum:{name:"بنفسجي", l:"#6D3FC0", ld:"#57309C", d:"#A385EE", dfg:"#160A2E"},
+  maroon:{name:"عنابي", l:"#A3324A", ld:"#84273B", d:"#E87A8E", dfg:"#2A0810"},
+  copper:{name:"نحاسي", l:"#B0602A", ld:"#8F4C1F", d:"#E59A5A", dfg:"#2A1306"},
+  graphite:{name:"فحمي", l:"#3B4A5C", ld:"#283442", d:"#9AAABB", dfg:"#0B1220"}
+};
+var ACCENT_ON = "";
+function accentKey(){
+  var k = STATE && STATE.settings && STATE.settings.accent;
+  if(!k){ try{ k = localStorage.getItem("fund-accent"); }catch(e){} }
+  return ACCENTS[k] ? k : "emerald";
+}
+function applyAccent(){
+  var k = accentKey(); if(k === ACCENT_ON) return; ACCENT_ON = k;
+  try{ localStorage.setItem("fund-accent", k); }catch(e){}
+  var a = ACCENTS[k];
+  var light = "--primary:" + a.l + ";--primary-dark:" + a.ld + ";--primary-soft:color-mix(in srgb," + a.l + " 11%,#fff);--ink:" + a.l + ";--ink-fg:#fff;" +
+    "--nav-bar:" + a.d + ";--nav-on:color-mix(in srgb," + a.d + " 20%,transparent);--side-bg:color-mix(in srgb," + a.l + " 20%,#05090b);" +
+    "--side-text:color-mix(in srgb," + a.d + " 14%,#e6edf0);--side-muted:color-mix(in srgb," + a.d + " 40%,#8b979c);--mark-a:" + a.d + ";--mark-b:" + a.l + ";";
+  var dark = "--primary:" + a.d + ";--primary-dark:color-mix(in srgb," + a.d + " 82%,#fff);--primary-soft:color-mix(in srgb," + a.d + " 15%,transparent);" +
+    "--ink:" + a.d + ";--ink-fg:" + a.dfg + ";--side-bg:color-mix(in srgb," + a.d + " 7%,#05080a);";
+  var el = document.getElementById("accent-style");
+  if(!el){ el = document.createElement("style"); el.id = "accent-style"; document.head.appendChild(el); }
+  el.textContent = ":root{" + light + "}@media (prefers-color-scheme: dark){:root:not([data-theme=\"light\"]){" + dark + "}}:root[data-theme=\"dark\"]{" + dark + "}";
+}
 function render(){
+  applyAccent();
   var el = document.getElementById("app");
   if(!el) return;
   if(AUTH.screen !== "app" || !STATE){ el.innerHTML = renderAuth(); return; }
@@ -2361,6 +2412,7 @@ function onClick(e){
   if(action === "confirm-yes"){ var ct = CONFIRM_T; CONFIRM_T = null; UI.modal = null; render(); if(ct){ CONFIRM_OK = true; onClick({target:ct}); CONFIRM_OK = false; } return; }
   if(action === "late-fam-open"){ var lk = t.getAttribute("data-fam"); UI.lateOpen = UI.lateOpen || {}; UI.lateOpen[lk] = !UI.lateOpen[lk]; render(); return; }
   if(action === "late-type"){ UI.lateType = t.getAttribute("data-type"); render(); return; }
+  if(action === "set-accent"){ var ak = t.getAttribute("data-k"); if(ACCENTS[ak] && ak !== accentKey()) doPublish(function(s){ s.settings.accent = ak; return s; }); return; }
   if(action === "toggle-more"){ UI.moreOpen = !UI.moreOpen; render(); return; }
   if(action === "mem-filter"){ UI.memFilter = t.getAttribute("data-f"); UI.page = 1; render(); return; }
   if(action === "late-fam-all"){ var lfs = lateFamilies(STATE, UI.lateType), lo = UI.lateOpen = UI.lateOpen || {}; var allO = lfs.every(function(g){ return lo[g.id || "_none"]; }); lfs.forEach(function(g){ lo[g.id || "_none"] = !allO; }); render(); return; }
