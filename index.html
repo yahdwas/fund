@@ -686,6 +686,7 @@ button.more-ver{background:none;border:0;cursor:pointer;font-family:inherit}
 "use strict";
 /* سجل التحديثات: أضف النسخة الجديدة فوق، ورقم النسخة يتحدّث منها تلقائياً */
 var CHANGELOG = [
+  {v:"1.0.5", d:"2026-10-06", items:["تسجيل الدفعة: تقدر تكتب أي مبلغ للقبر والبنود الخاصة بدون ما تنحصر في أرقام محددة", "أزرار 25 و50 صارت ضمن المبالغ السريعة"]},
   {v:"1.0.4", d:"2026-10-06", items:["صفحة لكل عضو: اضغط على اسمه وتشوف دفعاته ومتأخراته ومساهماته", "شاشة دخول جديدة", "سجل التحديثات: اضغط على رقم النسخة"]},
   {v:"1.0.3", d:"2026-10-06", items:["لوحة نظرة عامة جديدة فيها رسم الدخل والمصروفات لكل شهر", "آخر الحركات في الصفحة الرئيسية", "دائرة بأول حرف جنب اسم كل عضو"]},
   {v:"1.0.2", d:"2026-10-06", items:["خط جديد أوضح", "لون الهوية تختاره الإدارة من سبعة ألوان", "زر الوضع واختيار السنة صاروا في مكان واحد فوق"]},
@@ -1988,8 +1989,6 @@ function qpValidate(state, m){
   else if(!sel.length) r.target = "اختر عضو واحد على الأقل.";
   else {
     var tg = parseTarget(m.target);
-    if(tg.kind === "grave" && r.amountNum != null && [25,50,75].indexOf(r.amountNum) === -1) r.amount = "مبلغ القبر لازم يكون 25 أو 50 أو 75.";
-    if(tg.kind === "fund" && r.amountNum != null && [100, 150, 200, 250, 300, 350].indexOf(r.amountNum) === -1) r.amount = "المبلغ لازم يكون واحد من: 100، 150، 200، 250، 300، 350.";
     if(tg.kind === "period" || tg.kind === "campaign" || tg.kind === "grave" || tg.kind === "fund"){
       var paidAlready = [], over = [];
       sel.forEach(function(id){
@@ -2050,7 +2049,7 @@ function copyText(text){
   }catch(e){ fallback(); }
 }
 function quickAmountChips(state){
-  var presets = (UI.modal && UI.modal.type === "quickpay" && parseTarget(UI.modal.target).kind === "grave") ? [25, 50, 75] : ((UI.modal && UI.modal.type === "quickpay" && parseTarget(UI.modal.target).kind === "fund") ? [100, 150, 200, 250, 300, 350] : [100, 150, 200, state.settings.installmentAmount]);
+  var presets = (UI.modal && UI.modal.type === "quickpay" && parseTarget(UI.modal.target).kind === "grave") ? [25, 50, 75] : ((UI.modal && UI.modal.type === "quickpay" && parseTarget(UI.modal.target).kind === "fund") ? [25, 50, 100, 150, 200, 250, 300, 350] : [25, 50, 100, 150, 200, state.settings.installmentAmount]);
   var seen = {};
   return presets.filter(function(v){ if(!v || seen[v]) return false; seen[v]=true; return true; }).map(function(v){
     return '<button type="button" class="btn btn-ghost btn-sm" data-action="quick-amount" data-value="' + v + '">' + fmtMoney(v, state.settings.currency) + '</button>';
