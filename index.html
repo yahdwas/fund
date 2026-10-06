@@ -689,6 +689,29 @@ button.more-ver{background:none;border:0;cursor:pointer;font-family:inherit}
 .rep-names div{padding:8px 12px;border-bottom:1px solid var(--border);font-size:13.5px;display:flex;gap:10px;align-items:center;min-width:0}
 .rep-names span{color:var(--text-muted);font-size:12px;min-width:22px;font-variant-numeric:tabular-nums}
 @media (max-width:620px){.rep-names{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:none!important;grid-auto-flow:row}}
+
+/* ===== v1.0.8: أعمدة قابلة للتوسيع ===== */
+.rz-table{table-layout:fixed;min-width:0}
+.rz-table th{position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none}
+.rz-table th .th-txt{display:block;overflow:hidden;text-overflow:ellipsis}
+.rz-table td{overflow:hidden}
+.rz-table .name-cell .mem-link{max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:inline-flex}
+.rz-table .status-btn{max-width:100%;overflow:hidden}
+/* تجميد عمودي # والاسم أثناء التمرير يمين/يسار */
+.rz-table .stk-0,.rz-table td.seq-cell{position:sticky;right:0;z-index:1;background:var(--surface)}
+.rz-table .stk-1,.rz-table td.name-cell{position:sticky;right:var(--seqw,52px);z-index:1;background:var(--surface);box-shadow:-6px 0 8px -6px rgba(0,0,0,.18)}
+.rz-table thead .stk-0,.rz-table thead .stk-1{z-index:3;background:var(--surface-2)}
+.hscroll-top,.panel .table-wrap{scrollbar-width:auto;scrollbar-color:var(--border-2) transparent}
+.hscroll-top::-webkit-scrollbar,.panel .table-wrap::-webkit-scrollbar{height:12px}
+.hscroll-top::-webkit-scrollbar-thumb,.panel .table-wrap::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:8px;border:3px solid transparent;background-clip:padding-box}
+.hscroll-top::-webkit-scrollbar-thumb:hover,.panel .table-wrap::-webkit-scrollbar-thumb:hover{background-color:var(--text-muted)}
+.col-rs{position:absolute;top:0;bottom:0;left:-4px;width:9px;cursor:col-resize;z-index:2}
+.col-rs::after{content:"";position:absolute;top:22%;bottom:22%;left:4px;width:1px;background:var(--border-2)}
+.col-rs:hover::after,.rz-active .col-rs::after{width:3px;left:3px;background:var(--primary);border-radius:2px}
+body.rz-active{cursor:col-resize;user-select:none}
+.hscroll-top{overflow-x:auto;overflow-y:hidden;height:14px;margin-bottom:4px}
+.hscroll-top>div{height:1px}
+@media (max-width:760px){.rz-table .stk-0,.rz-table .stk-1,.rz-table td.seq-cell,.rz-table td.name-cell{position:static;box-shadow:none}.hscroll-top,.col-rs,.rz-table colgroup{display:none}.rz-table{width:auto!important;table-layout:auto}.rz-table td{overflow:visible}}
 </style>
 </head>
 <body>
@@ -697,6 +720,7 @@ button.more-ver{background:none;border:0;cursor:pointer;font-family:inherit}
 "use strict";
 /* سجل التحديثات: أضف النسخة الجديدة فوق، ورقم النسخة يتحدّث منها تلقائياً */
 var CHANGELOG = [
+  {v:"1.0.8", d:"2026-10-06", items:["جدول الأعضاء والدفعات: تقدر توسّع وتضيّق أي عمود بالسحب من طرفه (مثل إكسل)، ودبل كليك يرجعه، والعرض ينحفظ على جهازك", "شريط التمرير يمين ويسار صار فوق الجدول وتحته", "عمود الرقم والاسم ثابتين وأنت تمرر", "الجدول يحفظ مكان التمرير لما تسجل دفعة وترجع"]},
   {v:"1.0.7", d:"2026-10-06", items:["تقرير الإيرادات: عمود «دفعوا» (كم عضو من الكل) بدل عدد الدفعات، وانشال سجل الإيرادات بالتفصيل", "الضغط على اسم البند في تقرير الإيرادات يعرض اللي ما دفعوا وتسجل لهم من نفس النافذة", "PDF الإيرادات: الجدول بس", "تقرير المقبرة: الأسماء بس في 3 أعمدة مرتبة بالتسلسل، وفي آخر كل تقرير «انتهى التقرير»"]},
   {v:"1.0.6", d:"2026-10-06", items:["جدول الأعضاء: عمود لكل بند في السنة (الدفعات، الدعم، البنود الخاصة، الدعم الفردي، القبر)", "تسجيل الدفعة: كل خيارات الدعم صارت تحت «الدعم»", "الإدارة: قسم «الدعم الفردي» لدعم اختياري ما ينحسب على الباقين"]},
   {v:"1.0.5", d:"2026-10-06", items:["تسجيل الدفعة: تقدر تكتب أي مبلغ للقبر والبنود الخاصة بدون ما تنحصر في أرقام محددة", "أزرار 25 و50 صارت ضمن المبالغ السريعة"]},
@@ -1400,6 +1424,48 @@ function statCard(label, value, cls, ic, tone, sub){
   return '<div class="stat-card ' + (cls||"") + '">' + (ic ? '<div class="kpi-top"><div class="stat-label">' + esc(label) + '</div><div class="kpi-ic ' + (tone||"t-green") + '">' + icon(ic) + '</div></div>' : '<div class="stat-label">' + esc(label) + '</div>') + '<div class="stat-value">' + statValueHtml(value) + '</div>' + (sub ? '<div class="stat-sub">' + esc(sub) + '</div>' : '') + '</div>';
 }
 
+/* ---------- أعمدة قابلة للتوسيع (مثل إكسل) + شريط تمرير فوق وتحت ---------- */
+var COLW = null;
+function colWidths(){ if(!COLW){ try{ COLW = JSON.parse(localStorage.getItem("fund-colw") || "{}") || {}; }catch(e){ COLW = {}; } } return COLW; }
+function colWidth(k){
+  var w = colWidths()[k]; if(w) return w;
+  return k === "seq" ? 52 : k === "name" ? 260 : k === "total" ? 120 : (k === "p1" || k === "p2") ? 150 : 140;
+}
+function saveColWidths(){ try{ localStorage.setItem("fund-colw", JSON.stringify(colWidths())); }catch(e){} }
+var RZ = null;
+function rzStart(e){
+  var h = e.target.closest && e.target.closest(".col-rs"); if(!h) return;
+  var table = h.closest("table"), k = h.getAttribute("data-col");
+  var col = table.querySelector('col[data-col="' + (window.CSS && CSS.escape ? CSS.escape(k) : k) + '"]'); if(!col) return;
+  e.preventDefault();
+  RZ = {k:k, col:col, table:table, x:e.clientX, w:col.getBoundingClientRect().width || colWidth(k), tw:table.getBoundingClientRect().width};
+  document.body.classList.add("rz-active");
+}
+function rzMove(e){
+  if(!RZ) return;
+  var w = Math.max(48, Math.round(RZ.w + (RZ.x - e.clientX)));   /* RTL: السحب لليسار يوسّع */
+  RZ.col.style.width = w + "px"; RZ.table.style.width = (RZ.tw + w - RZ.w) + "px";
+  if(RZ.k === "seq") RZ.table.style.setProperty("--seqw", w + "px");
+  colWidths()[RZ.k] = w; syncHScroll();
+}
+function rzEnd(){ if(!RZ) return; RZ = null; document.body.classList.remove("rz-active"); saveColWidths(); }
+function rzReset(e){
+  var h = e.target.closest && e.target.closest(".col-rs"); if(!h) return;
+  delete colWidths()[h.getAttribute("data-col")]; saveColWidths(); render();
+}
+function syncHScroll(){
+  document.querySelectorAll(".hscroll-top").forEach(function(top){
+    var wrap = top.nextElementSibling, inner = top.firstChild; if(!wrap || !inner) return;
+    inner.style.width = wrap.scrollWidth + "px";
+    top.style.visibility = wrap.scrollWidth > wrap.clientWidth + 1 ? "visible" : "hidden";
+    if(top._synced) return; top._synced = true;
+    var busy = false;
+    top.addEventListener("scroll", function(){ if(busy){ busy = false; return; } busy = true; wrap.scrollLeft = top.scrollLeft; UI.memScroll = top.scrollLeft; });
+    wrap.addEventListener("scroll", function(){ if(busy){ busy = false; return; } busy = true; top.scrollLeft = wrap.scrollLeft; UI.memScroll = wrap.scrollLeft; });
+    if(UI.memScroll){ wrap.scrollLeft = UI.memScroll; top.scrollLeft = UI.memScroll; }
+  });
+}
+
 /* ---------- members tab ---------- */
 var PAGE_SIZE = 25;
 function renderMembersTab(state, ui){
@@ -1459,7 +1525,17 @@ function renderMembersTab(state, ui){
     '<div class="row-tools">' +
       '<input class="input search-input" placeholder="بحث عن عضو…" data-action="search" value="' + esc(ui.search||"") + '">' +
     '</div>' + filterHtml +
-    '<div class="table-wrap"><table class="mem-table"><thead><tr><th>#</th><th>العضو</th><th>' + esc(periodName(state, year, 1)) + '</th><th>' + esc(periodName(state, year, 2)) + '</th>' + yCamps.map(function(c){ return '<th>' + esc(c.name) + '</th>'; }).join("") + yFunds.map(function(f){ return '<th>' + esc(f.name) + (f.voluntary ? ' <small class="hint">(فردي)</small>' : '') + '</th>'; }).join("") + yGraves.map(function(c){ return '<th>القبر: ' + esc(c.name) + '</th>'; }).join("") + (hasExtra ? '<th>دعم تطوعي (قديم)</th>' : '') + '<th>الإجمالي</th></tr></thead>' +
+    (function(){
+      var cols = [["seq", "#"], ["name", "العضو"], ["p1", esc(periodName(state, year, 1))], ["p2", esc(periodName(state, year, 2))]]
+        .concat(yCamps.map(function(c){ return ["c:" + c.id, esc(c.name)]; }))
+        .concat(yFunds.map(function(f){ return ["f:" + f.id, esc(f.name) + (f.voluntary ? ' <small class="hint">(فردي)</small>' : '')]; }))
+        .concat(yGraves.map(function(c){ return ["g:" + c.id, 'القبر: ' + esc(c.name)]; }))
+        .concat(hasExtra ? [["extra", "دعم تطوعي (قديم)"]] : []).concat([["total", "الإجمالي"]]);
+      var tw = cols.reduce(function(x, c){ return x + colWidth(c[0]); }, 0);
+      return '<div class="hscroll-top" aria-hidden="true"><div></div></div>' +
+        '<div class="table-wrap"><table class="mem-table rz-table" style="width:' + tw + 'px;--seqw:' + colWidth("seq") + 'px"><colgroup>' + cols.map(function(c){ return '<col data-col="' + esc(c[0]) + '" style="width:' + colWidth(c[0]) + 'px">'; }).join("") + '</colgroup>' +
+        '<thead><tr>' + cols.map(function(c){ return '<th' + (c[0] === "seq" ? ' class="stk-0"' : c[0] === "name" ? ' class="stk-1"' : '') + ' title="' + esc(c[1].replace(/<[^>]+>/g, "")) + '"><span class="th-txt">' + c[1] + '</span><span class="col-rs" data-col="' + esc(c[0]) + '" title="اسحب لتغيير العرض، ودبل كليك يرجعه"></span></th>'; }).join("") + '</tr></thead>';
+    })() +
     '<tbody>' + (rows || '<tr><td colspan="' + (6 + yCamps.length + yFunds.length + yGraves.length) + '" class="hint">لا يوجد أعضاء مطابقون.</td></tr>') + '</tbody></table></div>' +
     '<div class="pager">' +
       '<button class="btn btn-ghost btn-sm" data-action="page-prev" ' + (page<=1?"disabled":"") + '>السابق</button>' +
@@ -2622,6 +2698,7 @@ function render(){
   if(!el) return;
   if(AUTH.screen !== "app" || !STATE){ el.innerHTML = renderAuth(); return; }
   el.innerHTML = renderApp(STATE, UI);
+  syncHScroll();
 }
 
 /* تأكيد داخل الصفحة (نوافذ confirm المتصفح ممنوعة داخل الصفحة المنشورة) */
@@ -3258,6 +3335,12 @@ async function afterLogin(){
   }).subscribe(function(status){ if(status === "SUBSCRIBED"){ if(SYNC === "offline") setSync("ok"); } else if(status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED"){ if(!SAVING) setSync("offline"); } });
 }
 window.addEventListener("offline", function(){ setSync("offline"); });
+document.addEventListener("pointerdown", rzStart);
+document.addEventListener("pointermove", rzMove);
+document.addEventListener("pointerup", rzEnd);
+document.addEventListener("pointercancel", rzEnd);
+document.addEventListener("dblclick", rzReset);
+window.addEventListener("resize", function(){ syncHScroll(); });
 window.addEventListener("online", function(){ if(sb && AUTH.screen === "app"){ fetchState().then(function(ok){ setSync(ok ? "ok" : "offline"); render(); }); } });
 document.addEventListener("visibilitychange", function(){
   if(document.visibilityState === "visible" && sb && ME && AUTH.screen === "app" && !SAVING){
