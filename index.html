@@ -745,6 +745,8 @@ body.rz-active{cursor:col-resize;user-select:none}
 .it-del{color:var(--critical)}
 .it-year-form{margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);justify-content:flex-start}
 @media (max-width:760px){.item-form{grid-template-columns:minmax(0,1fr)}.item-form .it-f-date{grid-column:auto}.it-row{flex-wrap:wrap}.it-act{width:100%;justify-content:flex-end}}
+
+.bi-names{font-size:12px;color:var(--text-2);margin-top:3px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -753,6 +755,7 @@ body.rz-active{cursor:col-resize;user-select:none}
 "use strict";
 /* سجل التحديثات: أضف النسخة الجديدة فوق، ورقم النسخة يتحدّث منها تلقائياً */
 var CHANGELOG = [
+  {v:"1.1.1", d:"2026-10-06", items:["التبرع والدعم الفردي صار يطلع فيه اسم الداعم: في تقرير الإيرادات، ولوحة المؤشرات، وقائمة البنود في الإدارة"]},
   {v:"1.1.0", d:"2026-10-06", items:["الإدارة: قسم واحد «البنود والدفعات» تضيف منه الدعم على الكل والدعم الفردي وحالات القبر، مع اليوم والشهر والسنة الهجرية", "كل البنود تطلع مرتبة حسب السنة ثم الشهر، والدفعة الرئيسية (محرم ورجب) معها", "انشالت الأقسام المتفرقة القديمة (الدعم، البنود الخاصة، الدعم الفردي، إغلاق وفتح البنود، السنوات)", "إضافة الدعم الجديد صارت من الإدارة بس، وحالات القبر كذلك"]},
   {v:"1.0.9", d:"2026-10-06", items:["جدول الأعضاء: الدفعة اللي ما حل وقتها (مثل رجب قبل وقته) تطلع «لم يحن» بدل «لم يسدد»", "أشكال الحالة (مسدد / لم يسدد) صارت أصغر وبدون إطار، وتاريخ السداد يطلع لما توقف عليها"]},
   {v:"1.0.8", d:"2026-10-06", items:["جدول الأعضاء والدفعات: تقدر توسّع وتضيّق أي عمود بالسحب من طرفه (مثل إكسل)، ودبل كليك يرجعه، والعرض ينحفظ على جهازك", "شريط التمرير يمين ويسار صار فوق الجدول وتحته", "عمود الرقم والاسم ثابتين وأنت تمرر", "الجدول يحفظ مكان التمرير لما تسجل دفعة وترجع"]},
@@ -1273,11 +1276,11 @@ function renderBI(state){
     return biRow(f.name + (f.open ? "" : " (مقفل)"), paid, n - paid, "المجموع " + fmtMoney(got), "ساهموا", "ما ساهموا", "f:" + f.id);
   }).join("");
   var dons = state.payments.filter(function(x){ return x.type === "تبرع" && inYear(x.date, vy); });
-  var donSummary = dons.length ? '<div class="bi-row"><div class="bi-row-head"><span class="bi-label">التبرعات الفردية</span><span class="bi-nums"><b>' + fmtMoney(dons.reduce(function(a,x){ return a + x.amount; }, 0)) + '</b> من ' + Object.keys(dons.reduce(function(o,x){ o[x.memberId] = 1; return o; }, {})).length + ' متبرع</span></div></div>' : '<div class="bi-row"><div class="bi-row-head"><span class="bi-label">التبرعات الفردية</span><span class="bi-nums">ما فيه تبرعات للحين</span></div></div>';
+  var donSummary = dons.length ? '<div class="bi-row"><div class="bi-row-head"><span class="bi-label">التبرعات الفردية</span><span class="bi-nums"><b>' + fmtMoney(dons.reduce(function(a,x){ return a + x.amount; }, 0)) + '</b></span></div><div class="bi-names">' + esc(payerNames(state, dons, 5)) + '</div></div>' : '<div class="bi-row"><div class="bi-row-head"><span class="bi-label">التبرعات الفردية</span><span class="bi-nums">ما فيه تبرعات للحين</span></div></div>';
   var volRows = (state.funds||[]).filter(function(f){ return f.voluntary && inYear(f.date, vy); }).map(function(f){
     var fps = state.payments.filter(function(x){ return x.fundId === f.id; });
     var who = Object.keys(fps.reduce(function(o,x){ o[x.memberId] = 1; return o; }, {})).length;
-    return '<div class="bi-row"><div class="bi-row-head"><span class="bi-label">' + esc(f.name) + ' <small class="hint">(فردي)</small></span><span class="bi-nums">' + (who ? '<b>' + fmtMoney(fps.reduce(function(a,x){ return a + x.amount; }, 0)) + '</b> من ' + who + ' داعم' : 'ما فيه داعمين للحين') + '</span></div></div>';
+    return '<div class="bi-row"><div class="bi-row-head"><span class="bi-label">' + esc(f.name) + ' <small class="hint">(فردي)</small></span><span class="bi-nums">' + (who ? '<b>' + fmtMoney(fps.reduce(function(a,x){ return a + x.amount; }, 0)) + '</b>' : 'ما فيه داعمين للحين') + '</span></div>' + (who ? '<div class="bi-names">' + esc(payerNames(state, fps, 5)) + '</div>' : '') + '</div>';
   }).join("");
   var legend = '<div class="bi-legend"><span><i class="bi-key bi-paid"></i>دفعوا / ساهموا</span><span><i class="bi-key bi-late"></i>متأخرين / ما ساهموا</span></div>';
   var BI_IC = {"الدفعات":"wallet","الدعم":"campaign","البنود الخاصة":"fund","القبر":"grave"};
@@ -1703,7 +1706,7 @@ function itemRows(state){
   (state.funds||[]).forEach(function(f){
     var fps = state.payments.filter(function(p){ return p.fundId === f.id; });
     var who = Object.keys(fps.reduce(function(o,x){ o[x.memberId] = 1; return o; }, {})).length;
-    rows.push({key:"f:" + f.id, date:f.date, type:f.voluntary ? "دعم فردي" : "دعم", cls:f.voluntary ? "t-vol" : "t-camp", name:f.name, closed:f.open === false, prog:f.voluntary ? who + " داعم" : who + " من " + n, del:'data-action="fund-delete" data-id="' + f.id + '"'});
+    rows.push({key:"f:" + f.id, date:f.date, type:f.voluntary ? "دعم فردي" : "دعم", cls:f.voluntary ? "t-vol" : "t-camp", name:f.name, closed:f.open === false, prog:f.voluntary ? (who ? payerNames(state, fps, 3) : "ما فيه داعمين") : who + " من " + n, del:'data-action="fund-delete" data-id="' + f.id + '"'});
   });
   (state.graveCases||[]).forEach(function(c){
     var cnt = (state.graveContributions||[]).filter(function(g){ return g.caseId === c.id; }).length;
@@ -2231,9 +2234,16 @@ function repYears(state){
 }
 function repInYear(iso, year){ return !year || hijriParts(iso).year === year; }
 function repMemberName(state, id){ var m = state.members.find(function(x){ return x.id === id; }); return m ? m.name : "عضو محذوف"; }
+/* أسماء الداعمين (للدعم الفردي والتبرعات): أول 3 أسماء ثم «و N غيرهم» */
+function payerNames(state, list, max){
+  max = max || 3;
+  var ids = Object.keys(list.reduce(function(o, p){ o[p.memberId] = 1; return o; }, {}));
+  var names = ids.map(function(id){ var m = state.members.find(function(x){ return x.id === id; }); return m ? m.name : "عضو محذوف"; });
+  return names.slice(0, max).join("، ") + (names.length > max ? " و" + (names.length - max) + " غيرهم" : "");
+}
 function repPayCategory(state, p){
   if(p.type === "دفعة أساسية") return periodName(state, p.year, p.installment);
-  if(p.type === "تبرع") return "تبرعات فردية";
+  if(p.type === "تبرع") return "تبرعات حرة";
   if(p.type === "بند خاص"){ var fd = (state.funds||[]).find(function(x){ return x.id === p.fundId; }); return fd ? fd.name : "بند خاص (محذوف)"; }
   if(p.campaignId){ var c = (state.campaigns||[]).find(function(x){ return x.id === p.campaignId; }); return c ? c.name : "دعم (محذوف)"; }
   if(p.type === "دعم إضافي") return "دعم تطوعي (قديم)";
@@ -2320,9 +2330,9 @@ function buildReport(state, kind, year, sel){
     function who(list){ return Object.keys(list.reduce(function(o,p){ o[p.memberId] = 1; return o; }, {})).length; }
     rep.pdfTableOnly = true;
     rep.sections.push({heading:"الإيرادات حسب البند",
-      cols:[{label:"البند", w:0.55}, {label:"دفعوا", w:0.2}, {label:"المبلغ", w:0.25, num:true}],
+      cols:[{label:"البند", w:0.48}, {label:"دفعوا / الداعم", w:0.3}, {label:"المبلغ", w:0.22, num:true}],
       rows: order.map(function(k){ var key = repPayKey(state, groups[k][0]), vol = !key || groups[k][0].type === "تبرع" || isVoluntaryKey(state, key);
-        return [k, vol ? who(groups[k]) + " داعم" : who(groups[k]) + " من " + nAll, M(repSum(groups[k]))]; }),
+        return [k, vol ? payerNames(state, groups[k], 2) : who(groups[k]) + " من " + nAll, M(repSum(groups[k]))]; }),
       drill: order.map(function(k){ return repPayKey(state, groups[k][0]); }),
       total: ["الإجمالي", who(pays) + " من " + nAll, M(repSum(pays))], empty:"ما فيه إيرادات مسجلة في هذي الفترة."});
   }
